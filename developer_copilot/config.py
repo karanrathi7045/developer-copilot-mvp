@@ -76,6 +76,7 @@ class Settings:
     openai_model: str = "gpt-4o-mini"
     openai_transcription_model: str = "whisper-1"
     openai_temperature: float = 0.2
+    openai_timeout_seconds: float = 8.0
 
     elevenlabs_api_key: str | None = None
     elevenlabs_voice_id: str = "21m00Tcm4TlvDq8ikWAM"
@@ -130,6 +131,7 @@ def get_settings() -> Settings:
         openai_model=os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
         openai_transcription_model=os.getenv("OPENAI_TRANSCRIPTION_MODEL", "whisper-1"),
         openai_temperature=float(os.getenv("OPENAI_TEMPERATURE", "0.2")),
+        openai_timeout_seconds=float(os.getenv("OPENAI_TIMEOUT_SECONDS", "8.0")),
         elevenlabs_api_key=os.getenv("ELEVENLABS_API_KEY"),
         elevenlabs_voice_id=os.getenv("ELEVENLABS_VOICE_ID", "21m00Tcm4TlvDq8ikWAM"),
         elevenlabs_model_id=os.getenv("ELEVENLABS_MODEL_ID", "eleven_multilingual_v2"),
