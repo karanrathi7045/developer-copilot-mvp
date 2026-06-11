@@ -1,0 +1,64 @@
+services:
+  - type: web
+    name: developer-copilot-api
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python -m uvicorn developer_copilot.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: DATA_SOURCE
+        value: mock
+      - key: FALLBACK_TO_MOCK
+        value: "true"
+      - key: TARGET_DEVELOPER_ID
+        value: "101"
+      - key: SCHEDULER_ENABLED
+        value: "true"
+      - key: SCHEDULER_TIMEZONE
+        value: Asia/Kolkata
+      - key: SCHEDULER_HOUR
+        value: "8"
+      - key: SCHEDULER_MINUTE
+        value: "0"
+      - key: TWILIO_SEND_AUDIO
+        value: "false"
+      - key: BASE_URL
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: TWILIO_ENABLED
+        sync: false
+      - key: TWILIO_ACCOUNT_SID
+        sync: false
+      - key: TWILIO_AUTH_TOKEN
+        sync: false
+      - key: TWILIO_WHATSAPP_FROM
+        sync: false
+      - key: SNOWFLAKE_ENABLED
+        sync: false
+      - key: SNOWFLAKE_ACCOUNT
+        sync: false
+      - key: SNOWFLAKE_USER
+        sync: false
+      - key: SNOWFLAKE_PASSWORD
+        sync: false
+      - key: SNOWFLAKE_ROLE
+        sync: false
+      - key: SNOWFLAKE_WAREHOUSE
+        sync: false
+      - key: SNOWFLAKE_DATABASE
+        sync: false
+      - key: SNOWFLAKE_SCHEMA
+        sync: false
+
+  - type: web
+    name: developer-copilot-dashboard
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: streamlit run frontend/streamlit_app.py --server.address 0.0.0.0 --server.port $PORT --server.headless true --browser.gatherUsageStats false
+    envVars:
+      - key: API_BASE_URL
+        sync: false
