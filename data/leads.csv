@@ -1,0 +1,101 @@
+id,name,status,project_id
+1001,Aarav Agarwal,Lost - Budget,101
+1002,Aditi Desai,Booked,121
+1003,Akash Khan,Lost - Budget,141
+1004,Anaya Patel,Qualified,161
+1005,Arjun Singh,Negotiation,181
+1006,Diya Agarwal,Lost - Timing,101
+1007,Ishaan Desai,Site Visit Scheduled,121
+1008,Kabir Khan,Lost - Budget,141
+1009,Meera Patel,New,161
+1010,Naina Singh,Booked,181
+1011,Rohan Agarwal,New,171
+1012,Saanvi Desai,Qualified,178
+1013,Tara Khan,Site Visit Scheduled,185
+1014,Vihaan Patel,Negotiation,192
+1015,Zoya Singh,Booked,199
+1016,Aarav Agarwal,Lost - Budget,106
+1017,Aditi Desai,Lost - Timing,113
+1018,Akash Khan,Lost - Authority,120
+1019,Anaya Patel,Lost - Competition,127
+1020,Arjun Singh,Inactive,134
+1021,Diya Agarwal,New,141
+1022,Ishaan Desai,Qualified,148
+1023,Kabir Khan,Site Visit Scheduled,155
+1024,Meera Patel,Negotiation,162
+1025,Naina Singh,Booked,169
+1026,Rohan Agarwal,Lost - Budget,176
+1027,Saanvi Desai,Lost - Timing,183
+1028,Tara Khan,Lost - Authority,190
+1029,Vihaan Patel,Lost - Competition,197
+1030,Zoya Singh,Inactive,104
+1031,Aarav Agarwal,New,111
+1032,Aditi Desai,Qualified,118
+1033,Akash Khan,Site Visit Scheduled,125
+1034,Anaya Patel,Negotiation,132
+1035,Arjun Singh,Booked,139
+1036,Diya Agarwal,Lost - Budget,146
+1037,Ishaan Desai,Lost - Timing,153
+1038,Kabir Khan,Lost - Authority,160
+1039,Meera Patel,Lost - Competition,167
+1040,Naina Singh,Inactive,174
+1041,Rohan Agarwal,New,181
+1042,Saanvi Desai,Qualified,188
+1043,Tara Khan,Site Visit Scheduled,195
+1044,Vihaan Patel,Negotiation,102
+1045,Zoya Singh,Booked,109
+1046,Aarav Agarwal,Lost - Budget,116
+1047,Aditi Desai,Lost - Timing,123
+1048,Akash Khan,Lost - Authority,130
+1049,Anaya Patel,Lost - Competition,137
+1050,Arjun Singh,Inactive,144
+1051,Diya Agarwal,New,151
+1052,Ishaan Desai,Qualified,158
+1053,Kabir Khan,Site Visit Scheduled,165
+1054,Meera Patel,Negotiation,172
+1055,Naina Singh,Booked,179
+1056,Rohan Agarwal,Lost - Budget,186
+1057,Saanvi Desai,Lost - Timing,193
+1058,Tara Khan,Lost - Authority,200
+1059,Vihaan Patel,Lost - Competition,107
+1060,Zoya Singh,Inactive,114
+1061,Aarav Agarwal,New,121
+1062,Aditi Desai,Qualified,128
+1063,Akash Khan,Site Visit Scheduled,135
+1064,Anaya Patel,Negotiation,142
+1065,Arjun Singh,Booked,149
+1066,Diya Agarwal,Lost - Budget,156
+1067,Ishaan Desai,Lost - Timing,163
+1068,Kabir Khan,Lost - Authority,170
+1069,Meera Patel,Lost - Competition,177
+1070,Naina Singh,Inactive,184
+1071,Rohan Agarwal,New,191
+1072,Saanvi Desai,Qualified,198
+1073,Tara Khan,Site Visit Scheduled,105
+1074,Vihaan Patel,Negotiation,112
+1075,Zoya Singh,Booked,119
+1076,Aarav Agarwal,Lost - Budget,126
+1077,Aditi Desai,Lost - Timing,133
+1078,Akash Khan,Lost - Authority,140
+1079,Anaya Patel,Lost - Competition,147
+1080,Arjun Singh,Inactive,154
+1081,Diya Agarwal,New,161
+1082,Ishaan Desai,Qualified,168
+1083,Kabir Khan,Site Visit Scheduled,175
+1084,Meera Patel,Negotiation,182
+1085,Naina Singh,Booked,189
+1086,Rohan Agarwal,Lost - Budget,196
+1087,Saanvi Desai,Lost - Timing,103
+1088,Tara Khan,Lost - Authority,110
+1089,Vihaan Patel,Lost - Competition,117
+1090,Zoya Singh,Inactive,124
+1091,Aarav Agarwal,New,131
+1092,Aditi Desai,Qualified,138
+1093,Akash Khan,Site Visit Scheduled,145
+1094,Anaya Patel,Negotiation,152
+1095,Arjun Singh,Booked,159
+1096,Diya Agarwal,Lost - Budget,166
+1097,Ishaan Desai,Lost - Timing,173
+1098,Kabir Khan,Lost - Authority,180
+1099,Meera Patel,Lost - Competition,187
+1100,Naina Singh,Inactive,194
