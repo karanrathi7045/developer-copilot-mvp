@@ -93,7 +93,11 @@ def _call_openai_json(settings: Settings, system_prompt: str, context: dict[str,
         return None
 
     try:
-        client = OpenAI(api_key=settings.openai_api_key)
+        client = OpenAI(
+            api_key=settings.openai_api_key,
+            timeout=settings.openai_timeout_seconds,
+            max_retries=0,
+        )
         response = client.responses.create(
             model=settings.openai_model,
             input=[
