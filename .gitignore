@@ -1,0 +1,28 @@
+# dependencies
+node_modules
+
+# next.js
+.next
+out
+
+# production
+build
+
+# local env files
+.env*
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# local caches
+.npm-cache
+__pycache__/
+.pytest_cache/
+.venv/
+storage/
+
+# system files
+.DS_Store
