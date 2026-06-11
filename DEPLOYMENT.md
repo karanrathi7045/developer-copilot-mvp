@@ -45,6 +45,33 @@ python scripts/publish_github.py
 
 The script publishes only the deployable app files and skips local secrets/caches.
 
+## Deploy With Render API
+
+Set a Render API key in `.env`:
+
+```bash
+RENDER_API_KEY=
+```
+
+If your Render account has multiple workspaces, also set:
+
+```bash
+RENDER_OWNER_ID=
+```
+
+Then run:
+
+```bash
+python scripts/deploy_render.py
+```
+
+The script creates or reuses:
+
+- `developer-copilot-api`
+- `developer-copilot-dashboard`
+
+It sets `BASE_URL` on the backend and `API_BASE_URL` on the dashboard.
+
 ## Render Setup
 
 Create two Render Web Services from the same GitHub repo.
