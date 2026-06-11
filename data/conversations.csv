@@ -1,0 +1,8 @@
+conversation_id,lead_id,channel_partner,created_at,last_activity_at,objection,message
+C-2001,L-1001,NorthStar Realty,2026-01-05,2026-01-14,budget,"Asked for a discount because the price felt high."
+C-2002,L-1002,NorthStar Realty,2026-01-21,2026-06-01,timing,"Interested, but wants to revisit next quarter."
+C-2003,L-1003,Metro Brokers,2026-02-04,2026-02-17,authority,"Needs approval from management."
+C-2004,L-1004,Metro Brokers,2026-02-12,2026-02-20,budget,"Cost is above current vendor."
+C-2005,L-1005,Legacy Partners,2025-11-16,2025-12-01,need,"Already have an alternative provider."
+C-2006,L-1006,Summit Channel,2026-03-02,2026-03-19,trust,"Requested security references and a case study."
+C-2007,L-1007,Summit Channel,2026-03-09,2026-05-20,competition,"Comparing against another vendor."
