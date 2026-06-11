@@ -159,6 +159,7 @@ def backend_env_vars() -> list[dict[str, str]]:
         "TWILIO_SEND_AUDIO": "false",
         "OPENAI_MODEL": os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
         "OPENAI_TEMPERATURE": os.getenv("OPENAI_TEMPERATURE", "0.2"),
+        "OPENAI_TIMEOUT_SECONDS": os.getenv("OPENAI_TIMEOUT_SECONDS", "8.0"),
         "TWILIO_ENABLED": os.getenv("TWILIO_ENABLED", "false"),
         "TWILIO_ACCOUNT_SID": os.getenv("TWILIO_ACCOUNT_SID", ""),
         "TWILIO_AUTH_TOKEN": os.getenv("TWILIO_AUTH_TOKEN", ""),
