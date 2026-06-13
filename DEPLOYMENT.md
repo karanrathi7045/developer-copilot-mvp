@@ -104,7 +104,11 @@ DATA_SOURCE=mock
 FALLBACK_TO_MOCK=true
 TARGET_DEVELOPER_ID=101
 BASE_URL=https://your-api-service.onrender.com
-TWILIO_SEND_AUDIO=false
+TWILIO_SEND_AUDIO=true
+ELEVENLABS_API_KEY=
+ELEVENLABS_VOICE_ID=
+ELEVENLABS_MODEL_ID=eleven_multilingual_v2
+ELEVENLABS_STT_MODEL_ID=scribe_v2
 ```
 
 Twilio env vars:
@@ -121,6 +125,8 @@ OpenAI is optional but recommended:
 ```bash
 OPENAI_API_KEY=
 OPENAI_MODEL=gpt-4o-mini
+OPENAI_TRANSCRIPTION_MODEL=whisper-1
+OPENAI_TIMEOUT_SECONDS=8.0
 ```
 
 Snowflake is optional. Keep `DATA_SOURCE=mock` for the fastest demo.
