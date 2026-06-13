@@ -40,6 +40,8 @@ def main() -> None:
     if not api_url:
         raise SystemExit("Backend service was created but Render did not return a public URL yet.")
 
+    for item in backend_env_vars():
+        set_env_var(session, api_service["id"], item["key"], item["value"])
     set_env_var(session, api_service["id"], "BASE_URL", api_url)
     trigger_deploy(session, api_service["id"])
 
