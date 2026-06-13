@@ -79,8 +79,9 @@ class Settings:
     openai_timeout_seconds: float = 8.0
 
     elevenlabs_api_key: str | None = None
-    elevenlabs_voice_id: str = "21m00Tcm4TlvDq8ikWAM"
+    elevenlabs_voice_id: str | None = None
     elevenlabs_model_id: str = "eleven_multilingual_v2"
+    elevenlabs_stt_model_id: str = "scribe_v2"
 
     twilio_enabled: bool = False
     twilio_account_sid: str | None = None
@@ -133,8 +134,9 @@ def get_settings() -> Settings:
         openai_temperature=float(os.getenv("OPENAI_TEMPERATURE", "0.2")),
         openai_timeout_seconds=float(os.getenv("OPENAI_TIMEOUT_SECONDS", "8.0")),
         elevenlabs_api_key=os.getenv("ELEVENLABS_API_KEY"),
-        elevenlabs_voice_id=os.getenv("ELEVENLABS_VOICE_ID", "21m00Tcm4TlvDq8ikWAM"),
+        elevenlabs_voice_id=os.getenv("ELEVENLABS_VOICE_ID") or None,
         elevenlabs_model_id=os.getenv("ELEVENLABS_MODEL_ID", "eleven_multilingual_v2"),
+        elevenlabs_stt_model_id=os.getenv("ELEVENLABS_STT_MODEL_ID", "scribe_v2"),
         twilio_enabled=_bool("TWILIO_ENABLED", False),
         twilio_account_sid=os.getenv("TWILIO_ACCOUNT_SID"),
         twilio_auth_token=os.getenv("TWILIO_AUTH_TOKEN"),
