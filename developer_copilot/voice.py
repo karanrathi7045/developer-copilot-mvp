@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import math
 import shutil
 import subprocess
@@ -25,7 +26,7 @@ def create_voice_note(settings: Settings, text: str) -> VoiceResult:
     timestamp = int(time.time())
     provider_failures: list[dict[str, Any]] = []
 
-    if settings.elevenlabs_api_key:
+    if settings.elevenlabs_api_key and settings.elevenlabs_voice_id:
         filename = f"daily-briefing-{timestamp}.mp3"
         audio_path = settings.generated_audio_dir / filename
         status = _create_elevenlabs_mp3(settings, text, audio_path)
@@ -37,6 +38,14 @@ def create_voice_note(settings: Settings, text: str) -> VoiceResult:
                 status=status,
             )
         provider_failures.append(status)
+    elif settings.elevenlabs_api_key:
+        provider_failures.append(
+            {
+                "provider": "elevenlabs",
+                "ok": False,
+                "detail": "ELEVENLABS_VOICE_ID is required for ElevenLabs voice generation",
+            }
+        )
 
     if settings.openai_api_key:
         filename = f"openai-briefing-{timestamp}.mp3"
@@ -102,9 +111,26 @@ def _create_elevenlabs_mp3(settings: Settings, text: str, audio_path: Path) -> d
     try:
         with httpx.Client(timeout=45) as client:
             response = client.post(url, json=payload, headers=headers)
-            response.raise_for_status()
+            if response.is_error:
+                return {
+                    "provider": "elevenlabs",
+                    "ok": False,
+                    "detail": _http_error_detail(response),
+                }
         audio_path.write_bytes(response.content)
-        return {"provider": "elevenlabs", "ok": True, "detail": "MP3 voice note generated"}
+        if audio_path.stat().st_size < 1024:
+            return {
+                "provider": "elevenlabs",
+                "ok": False,
+                "detail": "ElevenLabs returned an unexpectedly small audio file",
+            }
+        return {
+            "provider": "elevenlabs",
+            "ok": True,
+            "detail": "MP3 voice note generated",
+            "bytes": audio_path.stat().st_size,
+            "voice_id": settings.elevenlabs_voice_id,
+        }
     except Exception as exc:
         return {"provider": "elevenlabs", "ok": False, "detail": str(exc)}
 
@@ -116,7 +142,11 @@ def _create_openai_speech_mp3(settings: Settings, text: str, audio_path: Path) -
         return {"provider": "openai-tts", "ok": False, "detail": "openai is not installed"}
 
     try:
-        client = OpenAI(api_key=settings.openai_api_key)
+        client = OpenAI(
+            api_key=settings.openai_api_key,
+            timeout=settings.openai_timeout_seconds,
+            max_retries=0,
+        )
         response = client.audio.speech.create(
             model="gpt-4o-mini-tts",
             voice="alloy",
@@ -126,6 +156,8 @@ def _create_openai_speech_mp3(settings: Settings, text: str, audio_path: Path) -
         if not content:
             return {"provider": "openai-tts", "ok": False, "detail": "OpenAI TTS returned no audio"}
         audio_path.write_bytes(content)
+        if audio_path.stat().st_size < 1024:
+            return {"provider": "openai-tts", "ok": False, "detail": "OpenAI TTS returned an unexpectedly small audio file"}
         return {"provider": "openai-tts", "ok": True, "detail": "MP3 voice note generated"}
     except Exception as exc:
         return {"provider": "openai-tts", "ok": False, "detail": str(exc)}
@@ -192,3 +224,17 @@ def _write_mock_wav(path: Path) -> None:
             tone = math.sin(2 * math.pi * 440 * (index / sample_rate))
             value = int(amplitude * tone)
             handle.writeframesraw(value.to_bytes(2, byteorder="little", signed=True))
+
+
+def _http_error_detail(response: Any) -> str:
+    try:
+        payload = response.json()
+    except Exception:
+        payload = None
+    if isinstance(payload, dict):
+        detail = payload.get("detail") or payload.get("message") or payload.get("error")
+        if isinstance(detail, dict):
+            return json.dumps(detail)
+        if detail:
+            return str(detail)
+    return f"HTTP {response.status_code}: {response.text[:300]}"
