@@ -23,11 +23,23 @@ services:
       - key: SCHEDULER_MINUTE
         value: "0"
       - key: TWILIO_SEND_AUDIO
-        value: "false"
+        value: "true"
       - key: BASE_URL
         sync: false
       - key: OPENAI_API_KEY
         sync: false
+      - key: OPENAI_TRANSCRIPTION_MODEL
+        value: whisper-1
+      - key: OPENAI_TIMEOUT_SECONDS
+        value: "8.0"
+      - key: ELEVENLABS_API_KEY
+        sync: false
+      - key: ELEVENLABS_VOICE_ID
+        sync: false
+      - key: ELEVENLABS_MODEL_ID
+        value: eleven_multilingual_v2
+      - key: ELEVENLABS_STT_MODEL_ID
+        value: scribe_v2
       - key: TWILIO_ENABLED
         sync: false
       - key: TWILIO_ACCOUNT_SID
