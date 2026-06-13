@@ -144,8 +144,9 @@ ElevenLabs:
 
 ```bash
 ELEVENLABS_API_KEY=
-ELEVENLABS_VOICE_ID=21m00Tcm4TlvDq8ikWAM
+ELEVENLABS_VOICE_ID=
 ELEVENLABS_MODEL_ID=eleven_multilingual_v2
+ELEVENLABS_STT_MODEL_ID=scribe_v2
 ```
 
 Twilio WhatsApp:
@@ -158,18 +159,17 @@ TWILIO_WHATSAPP_FROM=whatsapp:+14155238886
 TWILIO_MESSAGING_SERVICE_SID=
 TWILIO_CONTENT_SID=
 TWILIO_STATUS_CALLBACK=
-TWILIO_SEND_AUDIO=false
+TWILIO_SEND_AUDIO=true
 ```
 
 For the Twilio Sandbox, the developer WhatsApp number must join the sandbox first. If your WhatsApp window requires approved outbound templates, set `TWILIO_CONTENT_SID`; otherwise the app sends the briefing as a regular `Body` message.
 
-Voice mode is not recommended for the hackathon deployment. Keep `TWILIO_SEND_AUDIO=false` for a stable demo.
-
-Optional voice mode:
+Voice mode:
 
 - Outgoing audio briefings need `ELEVENLABS_API_KEY`, `TWILIO_SEND_AUDIO=true`, and `BASE_URL` set to your public backend URL.
-- Incoming developer voice notes need `OPENAI_API_KEY` for transcription.
+- Incoming developer voice notes use `OPENAI_API_KEY` first, then fall back to ElevenLabs Speech-to-Text when `ELEVENLABS_API_KEY` is configured.
 - If `BASE_URL` is still `localhost`, Twilio can receive the text brief but cannot fetch the generated audio file.
+- For deployed demos, `BASE_URL` should be the Render backend URL, for example `https://developer-copilot-api.onrender.com`.
 
 Inbound developer questions use this webhook:
 
