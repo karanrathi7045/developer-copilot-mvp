@@ -41,7 +41,7 @@ def _optional_int(name: str, default: int | None = None) -> int | None:
 
 @dataclass(frozen=True)
 class Settings:
-    app_name: str = "Developer Co-pilot"
+    app_name: str = "Anarock PropPilot"
     environment: str = "local"
     base_url: str = "http://localhost:8000"
 
@@ -55,6 +55,8 @@ class Settings:
     bookings_csv_path: Path = Path("data/bookings.csv")
     channel_partner_csv_path: Path = Path("data/channel_partner.csv")
     generated_audio_dir: Path = Path("storage/voice_notes")
+    generated_chart_dir: Path = Path("storage/charts")
+    generated_transcript_dir: Path = Path("storage/transcripts")
     latest_briefing_path: Path = Path("storage/latest_briefing.json")
 
     snowflake_enabled: bool = False
@@ -73,7 +75,7 @@ class Settings:
     snowflake_channel_partner_table: str = "CHANNEL_PARTNER"
 
     openai_api_key: str | None = None
-    openai_model: str = "gpt-4o-mini"
+    openai_model: str = "gpt-5.4-mini"
     openai_transcription_model: str = "whisper-1"
     openai_temperature: float = 0.2
     openai_timeout_seconds: float = 8.0
@@ -89,6 +91,7 @@ class Settings:
     twilio_whatsapp_from: str | None = None
     twilio_messaging_service_sid: str | None = None
     twilio_content_sid: str | None = None
+    twilio_transcript_button_content_sid: str | None = None
     twilio_status_callback: str | None = None
     twilio_send_audio: bool = False
 
@@ -100,7 +103,7 @@ class Settings:
 
 def get_settings() -> Settings:
     return Settings(
-        app_name=os.getenv("APP_NAME", "Developer Co-pilot"),
+        app_name=os.getenv("APP_NAME", "Anarock PropPilot"),
         environment=os.getenv("ENVIRONMENT", "local"),
         base_url=os.getenv("BASE_URL", "http://localhost:8000").rstrip("/"),
         data_source=os.getenv("DATA_SOURCE", "mock").strip().lower(),
@@ -113,6 +116,8 @@ def get_settings() -> Settings:
         bookings_csv_path=Path(os.getenv("BOOKINGS_CSV_PATH", "data/bookings.csv")),
         channel_partner_csv_path=Path(os.getenv("CHANNEL_PARTNER_CSV_PATH", "data/channel_partner.csv")),
         generated_audio_dir=Path(os.getenv("GENERATED_AUDIO_DIR", "storage/voice_notes")),
+        generated_chart_dir=Path(os.getenv("GENERATED_CHART_DIR", "storage/charts")),
+        generated_transcript_dir=Path(os.getenv("GENERATED_TRANSCRIPT_DIR", "storage/transcripts")),
         latest_briefing_path=Path(os.getenv("LATEST_BRIEFING_PATH", "storage/latest_briefing.json")),
         snowflake_enabled=_bool("SNOWFLAKE_ENABLED", False),
         snowflake_account=os.getenv("SNOWFLAKE_ACCOUNT"),
@@ -129,7 +134,7 @@ def get_settings() -> Settings:
         snowflake_bookings_table=os.getenv("SNOWFLAKE_BOOKINGS_TABLE", "BOOKINGS"),
         snowflake_channel_partner_table=os.getenv("SNOWFLAKE_CHANNEL_PARTNER_TABLE", "CHANNEL_PARTNER"),
         openai_api_key=os.getenv("OPENAI_API_KEY"),
-        openai_model=os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
+        openai_model=os.getenv("OPENAI_MODEL", "gpt-5.4-mini"),
         openai_transcription_model=os.getenv("OPENAI_TRANSCRIPTION_MODEL", "whisper-1"),
         openai_temperature=float(os.getenv("OPENAI_TEMPERATURE", "0.2")),
         openai_timeout_seconds=float(os.getenv("OPENAI_TIMEOUT_SECONDS", "8.0")),
@@ -143,6 +148,7 @@ def get_settings() -> Settings:
         twilio_whatsapp_from=os.getenv("TWILIO_WHATSAPP_FROM"),
         twilio_messaging_service_sid=os.getenv("TWILIO_MESSAGING_SERVICE_SID"),
         twilio_content_sid=os.getenv("TWILIO_CONTENT_SID"),
+        twilio_transcript_button_content_sid=os.getenv("TWILIO_TRANSCRIPT_BUTTON_CONTENT_SID") or None,
         twilio_status_callback=os.getenv("TWILIO_STATUS_CALLBACK"),
         twilio_send_audio=_bool("TWILIO_SEND_AUDIO", False),
         scheduler_enabled=_bool("SCHEDULER_ENABLED", True),
