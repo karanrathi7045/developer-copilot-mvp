@@ -64,7 +64,7 @@ def send_whatsapp_followup_response(
                 transcript=result["reply"],
                 developer=result.get("developer"),
                 whatsapp_from=whatsapp_from,
-                source="copilot_voice_reply",
+                source="buildr_voice_reply",
             )
             statuses.append(
                 _send_twilio_transcript_button(
@@ -128,7 +128,7 @@ def answer_whatsapp_question(
             settings,
             {
                 "reply": (
-                    "I could not find your WhatsApp number in the Anarock PropPilot developer table. "
+                    "I could not find your WhatsApp number in the Anarock Buildr developer table. "
                     "Please ask the team to add your developer record first."
                 ),
                 "developer": None,
@@ -384,7 +384,7 @@ def _get_or_create_transcript_button_content_sid(settings: Settings) -> str | No
         return None
 
     payload = {
-        "friendly_name": "anarock_propilot_show_transcript",
+        "friendly_name": "anarock_buildr_show_transcript",
         "language": "en",
         "variables": {"1": "show_transcript:transcript_id"},
         "types": {
