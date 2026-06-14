@@ -25,7 +25,7 @@ def start_scheduler(settings: Settings) -> Any | None:
             timezone=settings.scheduler_timezone,
         ),
         id="daily-developer-copilot-briefing",
-        name="Daily Anarock PropPilot WhatsApp briefing",
+        name="Daily Anarock Buildr WhatsApp briefing",
         replace_existing=True,
         max_instances=1,
     )
