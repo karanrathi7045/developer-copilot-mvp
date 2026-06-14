@@ -7,6 +7,7 @@ from unittest.mock import patch
 from developer_copilot.ai import answer_question, generate_action
 from developer_copilot.ai import _format_long_answer
 from developer_copilot.briefings import create_daily_briefing
+from developer_copilot.chat_history import append_chat_messages, load_chat_history
 from developer_copilot.charts import create_question_chart
 from developer_copilot.config import Settings
 from developer_copilot.data_sources import (
@@ -71,6 +72,14 @@ class DeveloperCopilotTest(TestCase):
         self.assertIn("\n- Budget remained", formatted)
         self.assertIn("\n- Inactive channel partners", formatted)
 
+    def test_highlight_questions_force_bullets(self):
+        settings = Settings(scheduler_enabled=False)
+        project_data = select_developer_data(load_project_data(settings), 101)
+
+        result = answer_question(settings, project_data, "Give me the highlights of last week")
+
+        self.assertIn("\n- ", result.payload["answer"])
+
     def test_generates_action_from_mock_project_data(self):
         settings = Settings(scheduler_enabled=False)
         project_data = select_developer_data(load_project_data(settings), 101)
@@ -84,6 +93,26 @@ class DeveloperCopilotTest(TestCase):
         self.assertIn("NorthStar Realty", result.payload["cp_message"])
         self.assertTrue(result.payload["sales_talking_points"])
         self.assertTrue(result.payload["next_steps"])
+
+    def test_chat_history_persists_buildr_messages(self):
+        with TemporaryDirectory() as tmpdir:
+            settings = Settings(
+                chat_history_path=Path(tmpdir) / "chat_history.json",
+                scheduler_enabled=False,
+            )
+
+            append_chat_messages(
+                settings,
+                [
+                    {"role": "user", "content": "What is the top objection today?"},
+                    {"role": "assistant", "content": "The top objection is budget."},
+                ],
+            )
+            history = load_chat_history(settings)
+
+        self.assertEqual(len(history), 2)
+        self.assertEqual(history[0]["role"], "user")
+        self.assertEqual(history[1]["content"], "The top objection is budget.")
 
     def test_mock_tables_have_100_rows_each(self):
         for path in [
@@ -287,7 +316,7 @@ class DeveloperCopilotTest(TestCase):
         self.assertEqual(send_reply.call_count, 2)
         self.assertEqual(send_reply.call_args_list[1].kwargs["content_sid"], "HX123")
         self.assertTrue(transcript_payload.startswith("show_transcript:"))
-        self.assertEqual(saved["source"], "copilot_voice_reply")
+        self.assertEqual(saved["source"], "buildr_voice_reply")
         self.assertEqual(saved["transcript"], "Inventory to push today is the 1 BHK stock at Sky Heights.")
 
     def test_transcript_button_click_returns_transcript_in_chat(self):
@@ -351,6 +380,15 @@ class DeveloperCopilotTest(TestCase):
             self.assertTrue(chart.chart_path.exists())
             self.assertGreater(chart.chart_path.stat().st_size, 1024)
 
+    def test_simple_topic_question_does_not_generate_chart(self):
+        with TemporaryDirectory() as tmpdir:
+            settings = Settings(generated_chart_dir=Path(tmpdir), scheduler_enabled=False)
+            project_data = select_developer_data(load_project_data(settings), 101)
+
+            chart = create_question_chart(settings, project_data, "What is the top objection today?")
+
+        self.assertIsNone(chart)
+
     def test_whatsapp_text_analysis_can_attach_chart(self):
         with TemporaryDirectory() as tmpdir:
             settings = Settings(
@@ -371,6 +409,26 @@ class DeveloperCopilotTest(TestCase):
         self.assertIn("chart", result)
         self.assertEqual(result["chart"]["type"], "inventory")
         self.assertEqual(result["chart_media_url"].split("/charts/", 1)[0], "https://demo.loca.lt")
+
+    def test_whatsapp_simple_question_does_not_attach_chart(self):
+        with TemporaryDirectory() as tmpdir:
+            settings = Settings(
+                base_url="https://demo.loca.lt",
+                generated_chart_dir=Path(tmpdir),
+                scheduler_enabled=False,
+            )
+            project_data = load_project_data(settings)
+
+            result = answer_whatsapp_question(
+                settings,
+                project_data,
+                "whatsapp:+917045706453",
+                "What is the top objection today?",
+            )
+
+        self.assertEqual(result["reply_mode"], "text")
+        self.assertNotIn("chart", result)
+        self.assertNotIn("chart_media_url", result)
 
     def test_whatsapp_questions_route_to_different_answers(self):
         settings = Settings(scheduler_enabled=False)
