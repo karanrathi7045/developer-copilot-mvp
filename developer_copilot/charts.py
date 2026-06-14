@@ -79,20 +79,8 @@ def chart_payload(chart: ChartResult | None) -> dict[str, Any] | None:
 
 def _chart_spec(question: str) -> dict[str, Any] | None:
     text = " ".join(question.lower().split())
-    wants_visual = _has_any(
-        text,
-        "analysis",
-        "analyze",
-        "deep",
-        "chart",
-        "graph",
-        "visual",
-        "plot",
-        "trend",
-        "breakdown",
-        "compare",
-        "show",
-    )
+    if not _wants_complex_visual(text):
+        return None
 
     if _has_any(text, "conversion", "trend", "convert"):
         return {
@@ -133,7 +121,7 @@ def _chart_spec(question: str) -> dict[str, Any] | None:
             "subtitle": "Objection mentions from project activity",
             "value_format": "count",
         }
-    if wants_visual or _has_any(text, "lead", "pipeline", "status"):
+    if _has_any(text, "lead", "pipeline", "status"):
         return {
             "kind": "lead-status",
             "title": "Lead Pipeline Status",
@@ -141,6 +129,18 @@ def _chart_spec(question: str) -> dict[str, Any] | None:
             "value_format": "count",
         }
     return None
+
+
+def _wants_complex_visual(text: str) -> bool:
+    if _has_any(text, "chart", "graph", "visual", "visualization", "plot"):
+        return True
+    if _has_any(text, "analysis", "analyze", "deep", "breakdown", "compare", "comparison", "distribution"):
+        return True
+    if _has_any(text, "trend", "over time", "week on week", "month on month", "source wise", "by configuration"):
+        return True
+    if _has_any(text, "by project", "by source", "by status", "by channel", "by cp"):
+        return True
+    return False
 
 
 def _chart_rows(
@@ -307,7 +307,7 @@ def _draw_header(draw: ImageDraw.ImageDraw, title: str, subtitle: str) -> None:
     draw.text((56, 28), title, fill=INK, font=_font(34, bold=True))
     draw.text((56, 72), subtitle, fill=MUTED, font=_font(18))
     draw.rounded_rectangle((835, 28, 984, 62), radius=16, fill="#eef0ff")
-    draw.text((858, 36), "PropPilot chart", fill=BRAND, font=_font(17, bold=True))
+    draw.text((858, 36), "Buildr chart", fill=BRAND, font=_font(17, bold=True))
 
 
 def _draw_footer(draw: ImageDraw.ImageDraw) -> None:
