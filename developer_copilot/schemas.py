@@ -23,6 +23,22 @@ class AskResponse(BaseModel):
     chart_mime_type: str | None = None
 
 
+class ChatHistoryMessage(BaseModel):
+    role: str
+    content: str
+    chart_url: str | None = None
+    chart_title: str | None = None
+    created_at: str | None = None
+
+
+class ChatHistoryRequest(BaseModel):
+    messages: list[ChatHistoryMessage]
+
+
+class ChatHistoryResponse(BaseModel):
+    items: list[ChatHistoryMessage]
+
+
 class GenerateActionRequest(BaseModel):
     target: str = Field("channel partner", min_length=2)
     action_type: str = Field("cp_message", description="cp_message, sales_talking_points, or objection_handler")
