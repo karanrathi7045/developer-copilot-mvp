@@ -26,6 +26,8 @@ services:
         value: "true"
       - key: BASE_URL
         sync: false
+      - key: OPENAI_MODEL
+        value: gpt-5.4-mini
       - key: OPENAI_API_KEY
         sync: false
       - key: OPENAI_TRANSCRIPTION_MODEL
@@ -47,6 +49,8 @@ services:
       - key: TWILIO_AUTH_TOKEN
         sync: false
       - key: TWILIO_WHATSAPP_FROM
+        sync: false
+      - key: TWILIO_TRANSCRIPT_BUTTON_CONTENT_SID
         sync: false
       - key: SNOWFLAKE_ENABLED
         sync: false
