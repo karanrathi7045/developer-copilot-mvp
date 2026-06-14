@@ -25,7 +25,7 @@ def start_scheduler(settings: Settings) -> Any | None:
             timezone=settings.scheduler_timezone,
         ),
         id="daily-developer-copilot-briefing",
-        name="Daily Developer Co-pilot WhatsApp briefing",
+        name="Daily Anarock PropPilot WhatsApp briefing",
         replace_existing=True,
         max_instances=1,
     )
@@ -36,4 +36,3 @@ def start_scheduler(settings: Settings) -> Any | None:
 def stop_scheduler(scheduler: Any | None) -> None:
     if scheduler is not None:
         scheduler.shutdown(wait=False)
-
