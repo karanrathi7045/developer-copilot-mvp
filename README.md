@@ -1,6 +1,6 @@
-# Developer Co-pilot
+# Anarock PropPilot
 
-Developer Co-pilot is a hackathon MVP for daily developer sales briefings. It reads project data from Snowflake or mock CSV tables, reasons over pipeline health with OpenAI, sends WhatsApp updates through Twilio, and exposes a developer-facing Streamlit dashboard with a bottom-right co-pilot chatbot.
+Anarock PropPilot is a hackathon MVP for daily developer sales briefings. It reads project data from Snowflake or mock CSV tables, reasons over pipeline health with OpenAI, sends WhatsApp updates through Twilio, and exposes a developer-facing Streamlit dashboard with a bottom-right PropPilot chatbot.
 
 Mock CSV is the default, so the app runs without vendor credentials.
 
@@ -11,7 +11,7 @@ Mock CSV is the default, so the app runs without vendor credentials.
 - Twilio WhatsApp text dispatch when configured
 - Twilio inbound WhatsApp Q&A webhook
 - APScheduler daily 8 AM briefing job
-- Streamlit developer dashboard with floating Ask Co-pilot chatbot
+- Streamlit developer dashboard with floating Ask PropPilot chatbot
 - Six normalized mock tables with 100 rows each
 - Snowflake connector path with CSV fallback and seed script
 - Render deployment config without Docker
@@ -135,7 +135,7 @@ OpenAI:
 
 ```bash
 OPENAI_API_KEY=
-OPENAI_MODEL=gpt-4o-mini
+OPENAI_MODEL=gpt-5.4-mini
 OPENAI_TRANSCRIPTION_MODEL=whisper-1
 OPENAI_TEMPERATURE=0.2
 ```
@@ -158,16 +158,19 @@ TWILIO_AUTH_TOKEN=
 TWILIO_WHATSAPP_FROM=whatsapp:+14155238886
 TWILIO_MESSAGING_SERVICE_SID=
 TWILIO_CONTENT_SID=
+TWILIO_TRANSCRIPT_BUTTON_CONTENT_SID=
 TWILIO_STATUS_CALLBACK=
 TWILIO_SEND_AUDIO=true
 ```
 
-For the Twilio Sandbox, the developer WhatsApp number must join the sandbox first. If your WhatsApp window requires approved outbound templates, set `TWILIO_CONTENT_SID`; otherwise the app sends the briefing as a regular `Body` message.
+For the Twilio Sandbox, the developer WhatsApp number must join the sandbox first. If your WhatsApp window requires approved outbound templates, set `TWILIO_CONTENT_SID`; otherwise the app sends the briefing as a regular `Body` message. The Sandbox sender profile may still look Twilio-controlled; Anarock PropPilot branding appears inside the dashboard and message content. A fully branded WhatsApp sender requires an approved WhatsApp Business sender/profile.
 
 Voice mode:
 
 - Outgoing audio briefings need `ELEVENLABS_API_KEY`, `TWILIO_SEND_AUDIO=true`, and `BASE_URL` set to your public backend URL.
 - Incoming developer voice notes use `OPENAI_API_KEY` first, then fall back to ElevenLabs Speech-to-Text when `ELEVENLABS_API_KEY` is configured.
+- WhatsApp voice-note questions get voice-note replies; typed WhatsApp questions get written replies.
+- Voice-note questions also receive a `Show Transcript` WhatsApp button. When the developer taps it, the transcript is sent back into the same WhatsApp chat.
 - If `BASE_URL` is still `localhost`, Twilio can receive the text brief but cannot fetch the generated audio file.
 - For deployed demos, `BASE_URL` should be the Render backend URL, for example `https://developer-copilot-api.onrender.com`.
 
@@ -204,7 +207,7 @@ curl -X POST http://localhost:8000/briefing/daily \
   -d '{"send_whatsapp": false}'
 ```
 
-Ask Co-pilot:
+Ask PropPilot:
 
 ```bash
 curl -X POST http://localhost:8000/ask \
@@ -242,7 +245,7 @@ curl -X POST http://localhost:8000/twilio/whatsapp/webhook \
 ## Demo Script
 
 1. Open the Streamlit dashboard.
-2. Show the developer-style lead dashboard and the bottom-right Ask Co-pilot button.
+2. Show the developer-style lead dashboard and the bottom-right Ask PropPilot button.
 3. Ask: `What is the top objection today?`
 4. Ask: `Which inventory should I push today?`
 5. Show the same questions working through WhatsApp from the developer number.
@@ -255,4 +258,4 @@ curl -X POST http://localhost:8000/twilio/whatsapp/webhook \
 python -m unittest discover -s tests
 ```
 
-The existing analytics tests remain in place, and the new co-pilot tests cover mock briefing generation, Ask fallback, and action generation.
+The existing analytics tests remain in place, and the new PropPilot tests cover mock briefing generation, Ask fallback, and action generation.
