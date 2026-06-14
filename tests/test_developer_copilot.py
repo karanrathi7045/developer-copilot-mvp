@@ -2,16 +2,28 @@ import csv
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest import TestCase, main
+from unittest.mock import patch
 
 from developer_copilot.ai import answer_question, generate_action
+from developer_copilot.ai import _format_long_answer
 from developer_copilot.briefings import create_daily_briefing
+from developer_copilot.charts import create_question_chart
 from developer_copilot.config import Settings
 from developer_copilot.data_sources import (
     load_project_data,
     select_developer_data,
     select_developer_data_by_phone,
 )
-from developer_copilot.twilio_webhook import answer_whatsapp_question, twiml_message
+from developer_copilot.transcripts import load_voice_transcript, save_voice_transcript
+from developer_copilot.transcription import TranscriptionResult
+from developer_copilot.twilio_webhook import (
+    answer_transcript_button,
+    answer_whatsapp_question,
+    send_whatsapp_followup_response,
+    twiml_empty,
+    twiml_message,
+)
+from developer_copilot.voice import VoiceResult
 from developer_copilot.whatsapp import send_whatsapp_briefing, _twilio_form
 from scripts.load_snowflake_seed import split_sql
 
@@ -43,6 +55,21 @@ class DeveloperCopilotTest(TestCase):
         self.assertEqual(result.model, "mock-reasoner")
         self.assertIn("budget", result.payload["answer"].lower())
         self.assertTrue(result.payload["evidence"])
+
+    def test_long_answers_are_formatted_as_bullets(self):
+        answer = (
+            "Last week had three important highlights. "
+            "Bookings improved across 2 BHK demand. "
+            "Budget remained the strongest buyer objection. "
+            "Inactive channel partners need reactivation. "
+            "Inventory push should focus on available 1 BHK units."
+        )
+
+        formatted = _format_long_answer(answer)
+
+        self.assertIn("\n- Bookings improved", formatted)
+        self.assertIn("\n- Budget remained", formatted)
+        self.assertIn("\n- Inactive channel partners", formatted)
 
     def test_generates_action_from_mock_project_data(self):
         settings = Settings(scheduler_enabled=False)
@@ -123,6 +150,228 @@ class DeveloperCopilotTest(TestCase):
         self.assertIn("<Response><Message>", xml)
         self.assertIn("</Message></Response>", xml)
 
+    def test_twiml_message_can_return_voice_media_only(self):
+        xml = twiml_message(
+            "This text is used only as a fallback.",
+            "https://demo.loca.lt/audio/reply.mp3",
+        )
+
+        self.assertIn("<Response><Message><Media>", xml)
+        self.assertIn("https://demo.loca.lt/audio/reply.mp3", xml)
+        self.assertNotIn("This text is used only as a fallback.", xml)
+
+    def test_twiml_message_can_return_text_with_chart_media(self):
+        xml = twiml_message(
+            "Here is the inventory analysis.",
+            media_urls=["https://demo.loca.lt/charts/inventory.png"],
+            include_body=True,
+        )
+
+        self.assertIn("Here is the inventory analysis.", xml)
+        self.assertIn("<Media>https://demo.loca.lt/charts/inventory.png</Media>", xml)
+
+    def test_twiml_message_splits_voice_and_chart_media(self):
+        xml = twiml_message(
+            "Spoken answer",
+            media_urls=[
+                "https://demo.loca.lt/audio/reply.mp3",
+                "https://demo.loca.lt/charts/bookings.png",
+            ],
+            include_body=False,
+        )
+
+        self.assertEqual(xml.count("<Message>"), 2)
+        self.assertIn("<Media>https://demo.loca.lt/audio/reply.mp3</Media>", xml)
+        self.assertIn("<Media>https://demo.loca.lt/charts/bookings.png</Media>", xml)
+        self.assertNotIn("Spoken answer", xml)
+
+    def test_twiml_empty_acknowledges_voice_webhook_fast(self):
+        self.assertEqual(twiml_empty(), '<?xml version="1.0" encoding="UTF-8"?><Response></Response>')
+
+    def test_followup_sends_voice_and_chart_as_separate_messages(self):
+        settings = Settings(
+            twilio_enabled=True,
+            twilio_account_sid="AC123",
+            twilio_auth_token="token",
+            twilio_whatsapp_from="whatsapp:+14155238886",
+            twilio_transcript_button_content_sid="HX123",
+            scheduler_enabled=False,
+        )
+        project_data = load_project_data(Settings(scheduler_enabled=False))
+
+        with (
+            patch(
+                "developer_copilot.twilio_webhook.answer_whatsapp_question",
+                return_value={
+                    "reply": "Booking analysis",
+                    "reply_mode": "voice",
+                    "reply_media_url": "https://demo.loca.lt/audio/reply.mp3",
+                    "chart_media_url": "https://demo.loca.lt/charts/bookings.png",
+                },
+            ),
+            patch(
+                "developer_copilot.twilio_webhook._send_twilio_reply",
+                side_effect=[
+                    {"provider": "twilio", "sent": True, "message_sid": "audio"},
+                    {"provider": "twilio", "sent": True, "message_sid": "chart"},
+                    {"provider": "twilio", "sent": True, "message_sid": "transcript"},
+                ],
+            ) as send_reply,
+        ):
+            status = send_whatsapp_followup_response(
+                settings,
+                project_data,
+                "whatsapp:+917045706453",
+                "",
+                media_url="https://api.twilio.com/fake-media",
+                media_content_type="audio/ogg",
+            )
+
+        self.assertEqual(status["reply_mode"], "voice")
+        self.assertTrue(status["chart_attached"])
+        self.assertTrue(status["transcript_button_sent"])
+        self.assertEqual(send_reply.call_count, 3)
+        self.assertEqual(send_reply.call_args_list[0].kwargs["media_url"], "https://demo.loca.lt/audio/reply.mp3")
+        self.assertEqual(send_reply.call_args_list[1].kwargs["media_url"], "https://demo.loca.lt/charts/bookings.png")
+        self.assertEqual(send_reply.call_args_list[2].kwargs["content_sid"], "HX123")
+
+    def test_followup_sends_transcript_button_for_voice_question(self):
+        with TemporaryDirectory() as tmpdir:
+            settings = Settings(
+                base_url="https://demo.loca.lt",
+                generated_transcript_dir=Path(tmpdir),
+                twilio_enabled=True,
+                twilio_account_sid="AC123",
+                twilio_auth_token="token",
+                twilio_whatsapp_from="whatsapp:+14155238886",
+                twilio_transcript_button_content_sid="HX123",
+                scheduler_enabled=False,
+            )
+            project_data = load_project_data(Settings(scheduler_enabled=False))
+
+            with (
+                patch(
+                    "developer_copilot.twilio_webhook.answer_whatsapp_question",
+                    return_value={
+                        "reply": "Inventory to push today is the 1 BHK stock at Sky Heights.",
+                        "reply_mode": "voice",
+                        "reply_media_url": "https://demo.loca.lt/audio/reply.mp3",
+                        "developer": {"developer_name": "Karan Rathi", "id": 101},
+                        "transcribed_question": "What inventory should I push today?",
+                    },
+                ),
+                patch(
+                    "developer_copilot.twilio_webhook._send_twilio_reply",
+                    side_effect=[
+                        {"provider": "twilio", "sent": True, "message_sid": "audio"},
+                        {"provider": "twilio", "sent": True, "message_sid": "transcript"},
+                    ],
+                ) as send_reply,
+            ):
+                status = send_whatsapp_followup_response(
+                    settings,
+                    project_data,
+                    "whatsapp:+917045706453",
+                    "",
+                    media_url="https://api.twilio.com/fake-media",
+                    media_content_type="audio/ogg",
+                )
+
+            transcript_variables = send_reply.call_args_list[1].kwargs["content_variables"]
+            transcript_payload = transcript_variables["1"]
+            transcript_id = transcript_payload.removeprefix("show_transcript:")
+            saved = load_voice_transcript(settings, transcript_id)
+
+        self.assertEqual(status["reply_mode"], "voice")
+        self.assertTrue(status["transcript_button_sent"])
+        self.assertEqual(send_reply.call_count, 2)
+        self.assertEqual(send_reply.call_args_list[1].kwargs["content_sid"], "HX123")
+        self.assertTrue(transcript_payload.startswith("show_transcript:"))
+        self.assertEqual(saved["source"], "copilot_voice_reply")
+        self.assertEqual(saved["transcript"], "Inventory to push today is the 1 BHK stock at Sky Heights.")
+
+    def test_transcript_button_click_returns_transcript_in_chat(self):
+        with TemporaryDirectory() as tmpdir:
+            settings = Settings(
+                generated_transcript_dir=Path(tmpdir),
+                scheduler_enabled=False,
+            )
+            link = save_voice_transcript(
+                settings,
+                "Give me booking analysis",
+                {"developer_name": "Karan Rathi", "id": 101},
+                whatsapp_from="whatsapp:+917045706453",
+            )
+
+            reply = answer_transcript_button(
+                settings,
+                "whatsapp:+917045706453",
+                button_payload=f"show_transcript:{link['id']}",
+                button_text="Show Transcript",
+            )
+            fallback_reply = answer_transcript_button(
+                settings,
+                "whatsapp:+917045706453",
+                button_payload=None,
+                button_text="Show Transcript",
+            )
+
+        self.assertEqual(reply, "Transcript:\nGive me booking analysis")
+        self.assertEqual(fallback_reply, "Transcript:\nGive me booking analysis")
+
+    def test_voice_transcript_round_trip(self):
+        with TemporaryDirectory() as tmpdir:
+            settings = Settings(
+                base_url="https://demo.loca.lt",
+                generated_transcript_dir=Path(tmpdir),
+                scheduler_enabled=False,
+            )
+
+            link = save_voice_transcript(
+                settings,
+                "Give me booking analysis",
+                {"developer_name": "Karan Rathi", "id": 101},
+            )
+            saved = load_voice_transcript(settings, link["id"])
+
+        self.assertTrue(link["url"].startswith("https://demo.loca.lt/transcripts/"))
+        self.assertEqual(saved["developer"]["name"], "Karan Rathi")
+        self.assertEqual(saved["transcript"], "Give me booking analysis")
+
+    def test_inventory_question_generates_chart_png(self):
+        with TemporaryDirectory() as tmpdir:
+            settings = Settings(generated_chart_dir=Path(tmpdir), scheduler_enabled=False)
+            project_data = select_developer_data(load_project_data(settings), 101)
+
+            chart = create_question_chart(settings, project_data, "Show me inventory analysis")
+
+            self.assertIsNotNone(chart)
+            self.assertEqual(chart.mime_type, "image/png")
+            self.assertEqual(chart.chart_type, "inventory")
+            self.assertTrue(chart.chart_path.exists())
+            self.assertGreater(chart.chart_path.stat().st_size, 1024)
+
+    def test_whatsapp_text_analysis_can_attach_chart(self):
+        with TemporaryDirectory() as tmpdir:
+            settings = Settings(
+                base_url="https://demo.loca.lt",
+                generated_chart_dir=Path(tmpdir),
+                scheduler_enabled=False,
+            )
+            project_data = load_project_data(settings)
+
+            result = answer_whatsapp_question(
+                settings,
+                project_data,
+                "whatsapp:+917045706453",
+                "Show me inventory analysis",
+            )
+
+        self.assertEqual(result["reply_mode"], "text")
+        self.assertIn("chart", result)
+        self.assertEqual(result["chart"]["type"], "inventory")
+        self.assertEqual(result["chart_media_url"].split("/charts/", 1)[0], "https://demo.loca.lt")
+
     def test_whatsapp_questions_route_to_different_answers(self):
         settings = Settings(scheduler_enabled=False)
         project_data = load_project_data(settings)
@@ -149,21 +398,66 @@ class DeveloperCopilotTest(TestCase):
         self.assertIn("Brokerage booked", replies[2])
         self.assertIn("Talking point", replies[3])
 
-    def test_voice_note_without_transcription_config_gets_friendly_reply(self):
-        settings = Settings(scheduler_enabled=False)
-        project_data = load_project_data(settings)
+    def test_voice_question_gets_voice_reply_when_audio_is_public(self):
+        with TemporaryDirectory() as tmpdir:
+            audio_path = Path(tmpdir) / "reply.mp3"
+            audio_path.write_bytes(b"fake audio")
+            settings = Settings(
+                base_url="https://demo.loca.lt",
+                generated_audio_dir=Path(tmpdir),
+                scheduler_enabled=False,
+            )
+            project_data = load_project_data(settings)
 
-        result = answer_whatsapp_question(
-            settings,
-            project_data,
-            "whatsapp:+917045706453",
-            "",
-            media_url="https://api.twilio.com/fake-media",
-            media_content_type="audio/ogg",
-        )
+            with (
+                patch(
+                    "developer_copilot.twilio_webhook.transcribe_twilio_media",
+                    return_value=TranscriptionResult(
+                        text="What inventory should I push today?",
+                        ok=True,
+                        detail="Voice note transcribed in test",
+                    ),
+                ),
+                patch(
+                    "developer_copilot.twilio_webhook.create_voice_note",
+                    return_value=VoiceResult(
+                        audio_path=audio_path,
+                        audio_url="/audio/reply.mp3",
+                        mime_type="audio/mpeg",
+                        status={"provider": "test", "ok": True},
+                    ),
+                ),
+            ):
+                result = answer_whatsapp_question(
+                    settings,
+                    project_data,
+                    "whatsapp:+917045706453",
+                    "",
+                    media_url="https://api.twilio.com/fake-media",
+                    media_content_type="audio/ogg",
+                )
+
+        self.assertEqual(result["reply_mode"], "voice")
+        self.assertEqual(result["reply_media_url"], "https://demo.loca.lt/audio/reply.mp3")
+        self.assertEqual(result["transcribed_question"], "What inventory should I push today?")
+        self.assertIn("Inventory to push", result["reply"])
+
+    def test_voice_note_without_transcription_config_gets_friendly_reply(self):
+        with TemporaryDirectory() as tmpdir:
+            settings = Settings(generated_audio_dir=Path(tmpdir), scheduler_enabled=False)
+            project_data = load_project_data(settings)
+
+            result = answer_whatsapp_question(
+                settings,
+                project_data,
+                "whatsapp:+917045706453",
+                "",
+                media_url="https://api.twilio.com/fake-media",
+                media_content_type="audio/ogg",
+            )
 
         self.assertIn("voice note", result["reply"])
-        self.assertIn("transcribe", result["reply"])
+        self.assertIn("could not understand", result["reply"])
 
     def test_twilio_form_attaches_public_audio_url(self):
         with TemporaryDirectory() as tmpdir:
