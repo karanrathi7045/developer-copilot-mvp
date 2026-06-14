@@ -1,1 +1,1 @@
-"""Anarock PropPilot MVP package."""
+"""Anarock Buildr MVP package."""
