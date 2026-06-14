@@ -46,7 +46,10 @@ def answer_question(settings: Settings, project_data: ProjectData, question: str
 
     prompt = (
         "Answer the developer's question using only the provided project analytics. "
-        "Be specific, mention the evidence, and return JSON with keys: answer and evidence."
+        "Use computed_metrics for all arithmetic instead of recalculating from sample rows. "
+        "Keep the answer business-friendly and concise unless the developer explicitly asks for deep analysis. "
+        "When the answer has more than two distinct points, format the answer as short bullet points using '- '. "
+        "Return JSON with keys: answer and evidence."
     )
     payload = _call_openai_json(settings, prompt, {"question": question, **_project_context(project_data)})
     if not payload:
@@ -81,8 +84,56 @@ def _project_context(project_data: ProjectData, extra: dict[str, Any] | None = N
         "inventory": project_data.inventory[:20],
         "bookings": project_data.bookings[:30],
         "channel_partners": project_data.channel_partners[:30],
+        "computed_metrics": _computed_metrics(project_data),
         "data_source": project_data.source,
         "draft": extra or {},
+    }
+
+
+def _computed_metrics(project_data: ProjectData) -> dict[str, Any]:
+    inventory_by_configuration: dict[str, dict[str, float]] = {}
+    for row in project_data.inventory:
+        configuration = str(row.get("configuration") or row.get("unit_type") or "Unknown").strip() or "Unknown"
+        current = inventory_by_configuration.setdefault(configuration, {"total_units": 0, "available_units": 0})
+        current["total_units"] += _safe_float(row.get("total_units"))
+        current["available_units"] += _safe_float(row.get("available_units"))
+
+    booking_by_configuration: dict[str, dict[str, float]] = {}
+    for row in project_data.bookings:
+        configuration = str(row.get("configuration") or "Unknown").strip() or "Unknown"
+        current = booking_by_configuration.setdefault(
+            configuration,
+            {"bookings": 0, "agreement_value": 0, "brokerage_amount": 0},
+        )
+        current["bookings"] += 1
+        current["agreement_value"] += _safe_float(row.get("agreement_value"))
+        current["brokerage_amount"] += _safe_float(row.get("brokerage_amount"))
+
+    lead_statuses: dict[str, int] = {}
+    for row in project_data.leads:
+        status = str(row.get("status") or "Unknown").strip() or "Unknown"
+        lead_statuses[status] = lead_statuses.get(status, 0) + 1
+
+    project_stages: dict[str, int] = {}
+    for row in project_data.projects:
+        stage = str(row.get("stage") or "Unknown").strip() or "Unknown"
+        project_stages[stage] = project_stages.get(stage, 0) + 1
+
+    return {
+        "inventory": {
+            "rows": len(project_data.inventory),
+            "total_units": sum(_safe_float(row.get("total_units")) for row in project_data.inventory),
+            "available_units": sum(_safe_float(row.get("available_units")) for row in project_data.inventory),
+            "by_configuration": inventory_by_configuration,
+        },
+        "bookings": {
+            "count": len(project_data.bookings),
+            "agreement_value": sum(_safe_float(row.get("agreement_value")) for row in project_data.bookings),
+            "brokerage_amount": sum(_safe_float(row.get("brokerage_amount")) for row in project_data.bookings),
+            "by_configuration": booking_by_configuration,
+        },
+        "leads_by_status": lead_statuses,
+        "projects_by_stage": project_stages,
     }
 
 
@@ -374,10 +425,45 @@ def _fallback_action(project_data: ProjectData, request: dict[str, Any]) -> dict
 
 
 def _normalize_answer(payload: dict[str, Any]) -> dict[str, Any]:
+    answer = str(payload.get("answer", "")).strip()
     return {
-        "answer": str(payload.get("answer", "")).strip(),
+        "answer": _format_long_answer(answer),
         "evidence": _as_strings(payload.get("evidence")),
     }
+
+
+def _format_long_answer(answer: str) -> str:
+    if not answer or "\n- " in answer or answer.startswith("- "):
+        return answer
+    sentences = _split_sentences(answer)
+    if len(answer) < 180 and len(sentences) < 4:
+        return answer
+    if len(sentences) < 3:
+        return answer
+
+    intro = sentences[0]
+    bullet_sentences = sentences[1:7]
+    if len(intro) > 150:
+        bullet_sentences = sentences[:6]
+        intro = "Here are the key highlights:"
+    return intro + "\n" + "\n".join(f"- {sentence}" for sentence in bullet_sentences)
+
+
+def _split_sentences(text: str) -> list[str]:
+    protected = text.replace("e.g.", "eg").replace("i.e.", "ie")
+    parts: list[str] = []
+    current = []
+    for char in protected:
+        current.append(char)
+        if char in ".!?":
+            sentence = "".join(current).strip()
+            if sentence:
+                parts.append(sentence)
+            current = []
+    tail = "".join(current).strip()
+    if tail:
+        parts.append(tail)
+    return [part.replace("eg", "e.g.").replace("ie", "i.e.") for part in parts]
 
 
 def _normalize_action(payload: dict[str, Any]) -> dict[str, Any]:
