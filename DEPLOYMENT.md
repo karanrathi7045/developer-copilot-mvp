@@ -176,4 +176,4 @@ Share the dashboard URL with judges:
 https://your-dashboard-service.onrender.com
 ```
 
-The Anarock PropPilot dashboard talks to the deployed backend through `API_BASE_URL`.
+The Anarock Buildr dashboard talks to the deployed backend through `API_BASE_URL`.
