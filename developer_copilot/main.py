@@ -3,17 +3,20 @@ from __future__ import annotations
 from contextlib import asynccontextmanager
 from typing import Any
 
-from fastapi import FastAPI, Form, HTTPException, Response
+from fastapi import BackgroundTasks, FastAPI, Form, HTTPException, Response
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 
 from lead_analytics.analytics import structured_summary
 
 from developer_copilot.ai import answer_question, generate_action
 from developer_copilot.briefings import create_daily_briefing, load_latest_briefing
+from developer_copilot.charts import create_question_chart
 from developer_copilot.config import get_settings
 from developer_copilot.data_sources import DataSourceError, load_project_data, select_developer_data
 from developer_copilot.scheduler import start_scheduler, stop_scheduler
+from developer_copilot.transcripts import load_voice_transcript, voice_transcript_html
 from developer_copilot.schemas import (
     AskRequest,
     AskResponse,
@@ -22,10 +25,18 @@ from developer_copilot.schemas import (
     GenerateActionRequest,
     GenerateActionResponse,
 )
-from developer_copilot.twilio_webhook import answer_whatsapp_question, twiml_message
+from developer_copilot.twilio_webhook import (
+    answer_transcript_button,
+    answer_whatsapp_question,
+    send_whatsapp_followup_response,
+    twiml_empty,
+    twiml_message,
+)
 
 settings = get_settings()
 settings.generated_audio_dir.mkdir(parents=True, exist_ok=True)
+settings.generated_chart_dir.mkdir(parents=True, exist_ok=True)
+settings.generated_transcript_dir.mkdir(parents=True, exist_ok=True)
 
 
 @asynccontextmanager
@@ -50,6 +61,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 app.mount("/audio", StaticFiles(directory=str(settings.generated_audio_dir)), name="audio")
+app.mount("/charts", StaticFiles(directory=str(settings.generated_chart_dir)), name="charts")
 
 
 @app.get("/health")
@@ -113,16 +125,29 @@ def latest_briefing() -> dict[str, Any]:
     return briefing
 
 
+@app.get("/transcripts/{transcript_id}", response_class=HTMLResponse)
+def get_voice_transcript(transcript_id: str) -> HTMLResponse:
+    record = load_voice_transcript(settings, transcript_id)
+    if record is None:
+        raise HTTPException(status_code=404, detail="Transcript not found")
+    return HTMLResponse(voice_transcript_html(record, settings.app_name))
+
+
 @app.post("/ask", response_model=AskResponse)
 def ask(request: AskRequest) -> AskResponse:
     project_data = _load_project_or_502()
     result = answer_question(settings, project_data, request.question)
+    chart = create_question_chart(settings, project_data, request.question)
     return AskResponse(
         answer=result.payload["answer"],
         evidence=result.payload["evidence"],
         data_source=project_data.source,
         model=result.model,
         used_mock=result.used_mock,
+        chart_url=chart.chart_url if chart else None,
+        chart_title=chart.title if chart else None,
+        chart_type=chart.chart_type if chart else None,
+        chart_mime_type=chart.mime_type if chart else None,
     )
 
 
@@ -144,24 +169,63 @@ def action(request: GenerateActionRequest) -> GenerateActionResponse:
 
 @app.post("/twilio/whatsapp/webhook")
 def twilio_whatsapp_webhook(
+    background_tasks: BackgroundTasks,
     From: str = Form(...),  # noqa: N803 - Twilio sends title-case form fields.
     Body: str = Form(""),  # noqa: N803
     MessageSid: str | None = Form(None),  # noqa: N803
     NumMedia: str = Form("0"),  # noqa: N803
     MediaUrl0: str | None = Form(None),  # noqa: N803
     MediaContentType0: str | None = Form(None),  # noqa: N803
+    ButtonText: str | None = Form(None),  # noqa: N803
+    ButtonPayload: str | None = Form(None),  # noqa: N803
 ) -> Response:
+    transcript_reply = answer_transcript_button(
+        settings=settings,
+        whatsapp_from=From,
+        button_payload=ButtonPayload or Body,
+        button_text=ButtonText or Body,
+    )
+    if transcript_reply:
+        return Response(content=twiml_message(transcript_reply), media_type="application/xml")
+
     project_data = _load_all_project_data_or_502()
+    inbound_media_url = MediaUrl0 if NumMedia != "0" else None
+    is_voice_input = bool(inbound_media_url) and (
+        not MediaContentType0
+        or MediaContentType0.lower().startswith("audio/")
+        or not Body.strip()
+    )
+    if is_voice_input:
+        background_tasks.add_task(
+            send_whatsapp_followup_response,
+            settings,
+            project_data,
+            From,
+            Body,
+            inbound_media_url,
+            MediaContentType0,
+        )
+        return Response(content=twiml_empty(), media_type="application/xml")
+
     result = answer_whatsapp_question(
         settings=settings,
         project_data=project_data,
         whatsapp_from=From,
         question=Body,
-        media_url=MediaUrl0 if NumMedia != "0" else None,
+        media_url=inbound_media_url,
         media_content_type=MediaContentType0,
     )
+    media_urls = [
+        media_url
+        for media_url in (result.get("reply_media_url"), result.get("chart_media_url"))
+        if media_url
+    ]
     return Response(
-        content=twiml_message(result["reply"]),
+        content=twiml_message(
+            result["reply"],
+            media_urls=media_urls,
+            include_body=result.get("reply_mode") != "voice",
+        ),
         media_type="application/xml",
     )
 
