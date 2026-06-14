@@ -182,7 +182,11 @@ def backend_env_vars() -> list[dict[str, str]]:
         "SNOWFLAKE_DATABASE": os.getenv("SNOWFLAKE_DATABASE", ""),
         "SNOWFLAKE_SCHEMA": os.getenv("SNOWFLAKE_SCHEMA", ""),
     }
-    return [{"key": key, "value": value} for key, value in values.items()]
+    return [
+        {"key": key, "value": value}
+        for key, value in values.items()
+        if value != ""
+    ]
 
 
 def set_env_var(session: requests.Session, service_id: str, key: str, value: str) -> None:
