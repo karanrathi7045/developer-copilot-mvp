@@ -41,7 +41,7 @@ def _optional_int(name: str, default: int | None = None) -> int | None:
 
 @dataclass(frozen=True)
 class Settings:
-    app_name: str = "Anarock PropPilot"
+    app_name: str = "Anarock Buildr"
     environment: str = "local"
     base_url: str = "http://localhost:8000"
 
@@ -58,6 +58,7 @@ class Settings:
     generated_chart_dir: Path = Path("storage/charts")
     generated_transcript_dir: Path = Path("storage/transcripts")
     latest_briefing_path: Path = Path("storage/latest_briefing.json")
+    chat_history_path: Path = Path("storage/chat_history.json")
 
     snowflake_enabled: bool = False
     snowflake_account: str | None = None
@@ -103,7 +104,7 @@ class Settings:
 
 def get_settings() -> Settings:
     return Settings(
-        app_name=os.getenv("APP_NAME", "Anarock PropPilot"),
+        app_name=os.getenv("APP_NAME", "Anarock Buildr"),
         environment=os.getenv("ENVIRONMENT", "local"),
         base_url=os.getenv("BASE_URL", "http://localhost:8000").rstrip("/"),
         data_source=os.getenv("DATA_SOURCE", "mock").strip().lower(),
@@ -119,6 +120,7 @@ def get_settings() -> Settings:
         generated_chart_dir=Path(os.getenv("GENERATED_CHART_DIR", "storage/charts")),
         generated_transcript_dir=Path(os.getenv("GENERATED_TRANSCRIPT_DIR", "storage/transcripts")),
         latest_briefing_path=Path(os.getenv("LATEST_BRIEFING_PATH", "storage/latest_briefing.json")),
+        chat_history_path=Path(os.getenv("CHAT_HISTORY_PATH", "storage/chat_history.json")),
         snowflake_enabled=_bool("SNOWFLAKE_ENABLED", False),
         snowflake_account=os.getenv("SNOWFLAKE_ACCOUNT"),
         snowflake_user=os.getenv("SNOWFLAKE_USER"),
