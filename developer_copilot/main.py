@@ -12,6 +12,7 @@ from lead_analytics.analytics import structured_summary
 
 from developer_copilot.ai import answer_question, generate_action
 from developer_copilot.briefings import create_daily_briefing, load_latest_briefing
+from developer_copilot.chat_history import append_chat_messages, load_chat_history
 from developer_copilot.charts import create_question_chart
 from developer_copilot.config import get_settings
 from developer_copilot.data_sources import DataSourceError, load_project_data, select_developer_data
@@ -21,6 +22,8 @@ from developer_copilot.schemas import (
     AskRequest,
     AskResponse,
     BriefingRequest,
+    ChatHistoryRequest,
+    ChatHistoryResponse,
     DailyBriefingResponse,
     GenerateActionRequest,
     GenerateActionResponse,
@@ -149,6 +152,20 @@ def ask(request: AskRequest) -> AskResponse:
         chart_type=chart.chart_type if chart else None,
         chart_mime_type=chart.mime_type if chart else None,
     )
+
+
+@app.get("/chat-history", response_model=ChatHistoryResponse)
+def get_chat_history(limit: int = 50) -> ChatHistoryResponse:
+    return ChatHistoryResponse(items=load_chat_history(settings, limit=limit))
+
+
+@app.post("/chat-history", response_model=ChatHistoryResponse)
+def save_chat_history(request: ChatHistoryRequest) -> ChatHistoryResponse:
+    messages = [
+        item.model_dump() if hasattr(item, "model_dump") else item.dict()
+        for item in request.messages
+    ]
+    return ChatHistoryResponse(items=append_chat_messages(settings, messages))
 
 
 @app.post("/generate-action", response_model=GenerateActionResponse)
