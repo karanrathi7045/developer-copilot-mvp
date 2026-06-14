@@ -118,13 +118,14 @@ TWILIO_ENABLED=true
 TWILIO_ACCOUNT_SID=
 TWILIO_AUTH_TOKEN=
 TWILIO_WHATSAPP_FROM=whatsapp:+14155238886
+TWILIO_TRANSCRIPT_BUTTON_CONTENT_SID=
 ```
 
 OpenAI is optional but recommended:
 
 ```bash
 OPENAI_API_KEY=
-OPENAI_MODEL=gpt-4o-mini
+OPENAI_MODEL=gpt-5.4-mini
 OPENAI_TRANSCRIPTION_MODEL=whisper-1
 OPENAI_TIMEOUT_SECONDS=8.0
 ```
@@ -175,4 +176,4 @@ Share the dashboard URL with judges:
 https://your-dashboard-service.onrender.com
 ```
 
-The dashboard co-pilot talks to the deployed backend through `API_BASE_URL`.
+The Anarock PropPilot dashboard talks to the deployed backend through `API_BASE_URL`.
