@@ -41,6 +41,8 @@ def reason_about_briefing(
 
 def answer_question(settings: Settings, project_data: ProjectData, question: str) -> AITextResult:
     fallback = _fallback_answer(project_data, question)
+    force_bullets = _wants_structured_answer(question)
+    fallback["answer"] = _format_long_answer(fallback.get("answer", ""), force_bullets=force_bullets)
     if not settings.openai_api_key:
         return AITextResult(payload=fallback, model="mock-reasoner", used_mock=True)
 
@@ -49,13 +51,18 @@ def answer_question(settings: Settings, project_data: ProjectData, question: str
         "Use computed_metrics for all arithmetic instead of recalculating from sample rows. "
         "Keep the answer business-friendly and concise unless the developer explicitly asks for deep analysis. "
         "When the answer has more than two distinct points, format the answer as short bullet points using '- '. "
+        "For analysis, highlights, summaries, trends, comparisons, and last-week questions, always use bullet points. "
         "Return JSON with keys: answer and evidence."
     )
     payload = _call_openai_json(settings, prompt, {"question": question, **_project_context(project_data)})
     if not payload:
         return AITextResult(payload=fallback, model="mock-reasoner", used_mock=True)
 
-    return AITextResult(payload=_normalize_answer(payload), model=settings.openai_model, used_mock=False)
+    return AITextResult(
+        payload=_normalize_answer(payload, force_bullets=force_bullets),
+        model=settings.openai_model,
+        used_mock=False,
+    )
 
 
 def generate_action(settings: Settings, project_data: ProjectData, request: dict[str, Any]) -> AITextResult:
@@ -424,18 +431,23 @@ def _fallback_action(project_data: ProjectData, request: dict[str, Any]) -> dict
     )
 
 
-def _normalize_answer(payload: dict[str, Any]) -> dict[str, Any]:
+def _normalize_answer(payload: dict[str, Any], force_bullets: bool = False) -> dict[str, Any]:
     answer = str(payload.get("answer", "")).strip()
     return {
-        "answer": _format_long_answer(answer),
+        "answer": _format_long_answer(answer, force_bullets=force_bullets),
         "evidence": _as_strings(payload.get("evidence")),
     }
 
 
-def _format_long_answer(answer: str) -> str:
+def _format_long_answer(answer: str, force_bullets: bool = False) -> str:
     if not answer or "\n- " in answer or answer.startswith("- "):
         return answer
     sentences = _split_sentences(answer)
+    if force_bullets:
+        bullet_items = _bullet_items(answer, sentences)
+        if len(bullet_items) >= 2:
+            return "Here are the key points:\n" + "\n".join(f"- {item}" for item in bullet_items[:6])
+
     if len(answer) < 180 and len(sentences) < 4:
         return answer
     if len(sentences) < 3:
@@ -447,6 +459,53 @@ def _format_long_answer(answer: str) -> str:
         bullet_sentences = sentences[:6]
         intro = "Here are the key highlights:"
     return intro + "\n" + "\n".join(f"- {sentence}" for sentence in bullet_sentences)
+
+
+def _wants_structured_answer(question: str) -> bool:
+    question_lower = " ".join(question.lower().strip().split())
+    return _has_any(
+        question_lower,
+        "analysis",
+        "analyze",
+        "breakdown",
+        "deep",
+        "detail",
+        "detailed",
+        "highlights",
+        "last week",
+        "summary",
+        "summarize",
+        "performance",
+        "compare",
+        "comparison",
+        "trend",
+        "why",
+        "what changed",
+    )
+
+
+def _bullet_items(answer: str, sentences: list[str]) -> list[str]:
+    if len(sentences) >= 2:
+        return [_trim_bullet_item(sentence) for sentence in sentences if _trim_bullet_item(sentence)]
+
+    separators = ["; ", ". ", " and ", ", while ", ", with ", ", but "]
+    parts = [answer]
+    for separator in separators:
+        next_parts: list[str] = []
+        for part in parts:
+            next_parts.extend(part.split(separator))
+        parts = next_parts
+        if len([part for part in parts if part.strip()]) >= 2:
+            break
+
+    return [_trim_bullet_item(part) for part in parts if _trim_bullet_item(part)]
+
+
+def _trim_bullet_item(text: str) -> str:
+    cleaned = " ".join(text.strip(" -•\n\t").split())
+    if not cleaned:
+        return ""
+    return cleaned[:1].upper() + cleaned[1:]
 
 
 def _split_sentences(text: str) -> list[str]:
