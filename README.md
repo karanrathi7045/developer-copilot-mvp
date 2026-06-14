@@ -1,6 +1,6 @@
-# Anarock PropPilot
+# Anarock Buildr
 
-Anarock PropPilot is a hackathon MVP for daily developer sales briefings. It reads project data from Snowflake or mock CSV tables, reasons over pipeline health with OpenAI, sends WhatsApp updates through Twilio, and exposes a developer-facing Streamlit dashboard with a bottom-right PropPilot chatbot.
+Anarock Buildr is a hackathon MVP for daily developer sales briefings. It reads project data from Snowflake or mock CSV tables, reasons over pipeline health with OpenAI, sends WhatsApp updates through Twilio, and exposes a developer-facing Streamlit dashboard with a bottom-right Buildr chatbot.
 
 Mock CSV is the default, so the app runs without vendor credentials.
 
@@ -11,7 +11,7 @@ Mock CSV is the default, so the app runs without vendor credentials.
 - Twilio WhatsApp text dispatch when configured
 - Twilio inbound WhatsApp Q&A webhook
 - APScheduler daily 8 AM briefing job
-- Streamlit developer dashboard with floating Ask PropPilot chatbot
+- Streamlit developer dashboard with floating Ask Buildr chatbot
 - Six normalized mock tables with 100 rows each
 - Snowflake connector path with CSV fallback and seed script
 - Render deployment config without Docker
@@ -163,7 +163,7 @@ TWILIO_STATUS_CALLBACK=
 TWILIO_SEND_AUDIO=true
 ```
 
-For the Twilio Sandbox, the developer WhatsApp number must join the sandbox first. If your WhatsApp window requires approved outbound templates, set `TWILIO_CONTENT_SID`; otherwise the app sends the briefing as a regular `Body` message. The Sandbox sender profile may still look Twilio-controlled; Anarock PropPilot branding appears inside the dashboard and message content. A fully branded WhatsApp sender requires an approved WhatsApp Business sender/profile.
+For the Twilio Sandbox, the developer WhatsApp number must join the sandbox first. If your WhatsApp window requires approved outbound templates, set `TWILIO_CONTENT_SID`; otherwise the app sends the briefing as a regular `Body` message. The Sandbox sender profile may still look Twilio-controlled; Anarock Buildr branding appears inside the dashboard and message content. A fully branded WhatsApp sender requires an approved WhatsApp Business sender/profile.
 
 Voice mode:
 
@@ -207,7 +207,7 @@ curl -X POST http://localhost:8000/briefing/daily \
   -d '{"send_whatsapp": false}'
 ```
 
-Ask PropPilot:
+Ask Buildr:
 
 ```bash
 curl -X POST http://localhost:8000/ask \
@@ -245,7 +245,7 @@ curl -X POST http://localhost:8000/twilio/whatsapp/webhook \
 ## Demo Script
 
 1. Open the Streamlit dashboard.
-2. Show the developer-style lead dashboard and the bottom-right Ask PropPilot button.
+2. Show the developer-style lead dashboard and the bottom-right Ask Buildr button.
 3. Ask: `What is the top objection today?`
 4. Ask: `Which inventory should I push today?`
 5. Show the same questions working through WhatsApp from the developer number.
@@ -258,4 +258,4 @@ curl -X POST http://localhost:8000/twilio/whatsapp/webhook \
 python -m unittest discover -s tests
 ```
 
-The existing analytics tests remain in place, and the new PropPilot tests cover mock briefing generation, Ask fallback, and action generation.
+The existing analytics tests remain in place, and the new Buildr tests cover mock briefing generation, Ask fallback, and action generation.
