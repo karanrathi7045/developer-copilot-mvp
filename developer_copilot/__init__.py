@@ -1,2 +1,1 @@
-"""Developer Co-pilot MVP package."""
-
+"""Anarock PropPilot MVP package."""
