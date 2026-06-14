@@ -99,7 +99,7 @@ def build_deterministic_briefing(project_data: ProjectData) -> dict[str, Any]:
         else "Developer"
     )
     summary_text = (
-        f"Good morning {developer_name}. Developer Co-pilot briefing. "
+        f"Good morning {developer_name}. Anarock PropPilot briefing. "
         f"{objection_text}. {conversion_trend}. {inactive_text}. "
         f"{inventory_opportunity}. Recommendation: {recommendation}"
     )
