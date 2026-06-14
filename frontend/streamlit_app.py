@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+from datetime import datetime, timezone
 from html import escape
 from typing import Any
 
@@ -9,11 +10,22 @@ import streamlit as st
 
 
 API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:8000").rstrip("/")
+COPILOT_GREETING = (
+    "Hi Karan. Anarock Buildr is ready. Ask me about bookings, conversion, "
+    "inventory, CPs, or the next action for today."
+)
+LEGACY_COPILOT_GREETINGS = {
+    COPILOT_GREETING,
+    (
+        "Hi Karan. Anarock PropPilot is ready. Ask me about bookings, conversion, "
+        "inventory, CPs, or the next action for today."
+    ),
+}
 
 
 st.set_page_config(
-    page_title="Anarock PropPilot",
-    page_icon="AP",
+    page_title="Anarock Buildr",
+    page_icon="AB",
     layout="wide",
     initial_sidebar_state="collapsed",
 )
@@ -28,7 +40,7 @@ def api_get(path: str, show_error: bool = False) -> dict[str, Any] | None:
         return response.json()
     except requests.RequestException as exc:
         if show_error:
-            st.warning(f"Anarock PropPilot data is not reachable yet: {exc}")
+            st.warning(f"Anarock Buildr data is not reachable yet: {exc}")
         return None
 
 
@@ -715,15 +727,57 @@ def render_global_styles() -> None:
         div[data-testid="stPopover"] p {
             font-size: 14px;
         }
+        div[data-testid="stPopoverBody"] {
+            position: relative !important;
+            width: 560px !important;
+            min-width: 560px !important;
+            max-width: calc(100vw - 32px) !important;
+            height: auto !important;
+            min-height: 0 !important;
+            max-height: min(680px, calc(100vh - 40px)) !important;
+            overflow-y: auto !important;
+            box-sizing: border-box !important;
+        }
+        div[data-testid="stPopoverBody"] .st-key-copilot_history_toggle {
+            position: absolute !important;
+            top: 24px !important;
+            right: 24px !important;
+            z-index: 10 !important;
+            width: 118px !important;
+        }
+        div[data-testid="stPopoverBody"] .st-key-copilot_history_toggle button {
+            min-height: 42px !important;
+            white-space: nowrap !important;
+            border-radius: 999px !important;
+            font-size: 11px !important;
+            font-weight: 800 !important;
+            padding-left: 10px !important;
+            padding-right: 10px !important;
+        }
         .chat-header {
             display: flex;
             align-items: center;
             gap: 12px;
-            padding: 14px;
+            padding: 14px 150px 14px 14px;
             border: 1px solid rgba(228, 232, 240, 0.95);
             border-radius: 16px;
             margin-bottom: 12px;
             background: linear-gradient(135deg, #ffffff 0%, #f7f9ff 52%, #eef2ff 100%);
+        }
+        .chat-history-empty {
+            color: #aeb7c8;
+            border: 1px dashed rgba(174, 183, 200, 0.42);
+            border-radius: 14px;
+            padding: 18px;
+            font-size: 13px;
+            line-height: 1.45;
+            background: rgba(245, 247, 251, 0.06);
+            width: 100%;
+            min-height: 170px;
+            box-sizing: border-box;
+            display: grid;
+            place-items: center;
+            text-align: center;
         }
         .chat-dot {
             width: 48px;
@@ -772,9 +826,69 @@ def render_global_styles() -> None:
             display: flex;
             flex-direction: column;
             gap: 10px;
-            max-height: 330px;
+            min-height: 280px;
+            max-height: 420px;
             overflow-y: auto;
             padding: 2px 2px 10px;
+            box-sizing: border-box;
+            width: 100%;
+        }
+        div[data-testid="stPopoverBody"] [class*="st-key-buildr_suggestion_pills"] {
+            margin: 0 0 6px 0 !important;
+            overflow: hidden !important;
+        }
+        div[data-testid="stPopoverBody"] [class*="st-key-buildr_suggestion_pills"] [data-testid="stWidgetLabel"] {
+            display: none !important;
+        }
+        div[data-testid="stPopoverBody"] [class*="st-key-buildr_suggestion_pills"] div[role="radiogroup"] {
+            display: flex !important;
+            flex-wrap: nowrap !important;
+            align-items: center !important;
+            gap: 8px !important;
+            overflow-x: auto !important;
+            overflow-y: hidden !important;
+            padding: 4px 2px 8px !important;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(108, 115, 214, 0.7) transparent;
+        }
+        div[data-testid="stPopoverBody"] [class*="st-key-buildr_suggestion_pills"] div[role="radiogroup"]::-webkit-scrollbar {
+            height: 5px;
+        }
+        div[data-testid="stPopoverBody"] [class*="st-key-buildr_suggestion_pills"] div[role="radiogroup"]::-webkit-scrollbar-thumb {
+            background: rgba(108, 115, 214, 0.7);
+            border-radius: 99px;
+        }
+        div[data-testid="stPopoverBody"] [class*="st-key-buildr_suggestion_pills"] label,
+        div[data-testid="stPopoverBody"] [class*="st-key-buildr_suggestion_pills"] button {
+            flex: 0 0 auto !important;
+        }
+        div[data-testid="stPopoverBody"] [class*="st-key-buildr_suggestion_pills"] label > div,
+        div[data-testid="stPopoverBody"] [class*="st-key-buildr_suggestion_pills"] button {
+            width: auto !important;
+            min-width: max-content !important;
+            white-space: nowrap !important;
+            border: 1px solid rgba(229, 232, 255, 0.95) !important;
+            border-radius: 999px !important;
+            background: #f5f7ff !important;
+            color: #343980 !important;
+            box-shadow: 0 8px 18px rgba(68, 71, 184, 0.08) !important;
+            min-height: 34px !important;
+            padding: 7px 12px !important;
+            font-size: 12px !important;
+            font-weight: 800 !important;
+        }
+        div[data-testid="stPopoverBody"] [class*="st-key-buildr_suggestion_pills"] button p {
+            white-space: nowrap !important;
+            font-size: 12px !important;
+            font-weight: 800 !important;
+            color: #343980 !important;
+            line-height: 1.2 !important;
+        }
+        div[data-testid="stPopoverBody"] [class*="st-key-buildr_suggestion_pills"] label:hover > div,
+        div[data-testid="stPopoverBody"] [class*="st-key-buildr_suggestion_pills"] button:hover {
+            background: #eef1ff !important;
+            border-color: rgba(108, 115, 214, 0.44) !important;
+            transform: translateY(-1px);
         }
         .chat-bubble {
             border-radius: 14px;
@@ -794,6 +908,25 @@ def render_global_styles() -> None:
             align-self: flex-end;
             background: var(--brand);
             color: #ffffff;
+        }
+        .chat-chart-card {
+            align-self: stretch;
+            border-radius: 14px;
+            overflow: hidden;
+            background: #ffffff;
+            border: 1px solid #e7ebf3;
+        }
+        .chat-chart-card img {
+            display: block;
+            width: 100%;
+            height: auto;
+        }
+        .chat-chart-caption {
+            color: #7b8496;
+            font-size: 12px;
+            font-weight: 750;
+            padding: 8px 12px 10px;
+            background: #f7f9ff;
         }
         .stForm {
             border: 0 !important;
@@ -832,6 +965,22 @@ def render_global_styles() -> None:
             div[data-testid="stPopover"] {
                 right: 16px !important;
                 bottom: 16px !important;
+            }
+            div[data-testid="stPopoverBody"] {
+                width: calc(100vw - 24px) !important;
+                min-width: calc(100vw - 24px) !important;
+            }
+            div[data-testid="stPopoverBody"] .st-key-copilot_history_toggle {
+                top: 22px !important;
+                right: 20px !important;
+                width: 106px !important;
+            }
+            .chat-header {
+                padding-right: 128px;
+            }
+            .chat-log {
+                min-height: 250px;
+                max-height: 370px;
             }
         }
         </style>
@@ -1038,54 +1187,61 @@ def render_today_item(icon: str, icon_class: str, value: str, label: str) -> str
 
 
 def render_copilot_widget() -> None:
-    if "copilot_messages" not in st.session_state:
-        st.session_state.copilot_messages = [
-            {
-                "role": "assistant",
-                "content": "Hi Karan. Anarock PropPilot is ready. Ask me about bookings, conversion, inventory, CPs, or the next action for today.",
-            }
-        ]
+    init_copilot_state()
 
-    with st.popover("Ask PropPilot", use_container_width=False):
+    with st.popover("Ask Buildr", use_container_width=False):
         st.html(
             """
             <div class="chat-header">
                 <div class="chat-dot" aria-hidden="true"></div>
                 <div>
-                    <div class="chat-title">Anarock PropPilot</div>
+                    <div class="chat-title">Anarock Buildr</div>
                     <div class="chat-subtitle">Live project assistant</div>
                 </div>
             </div>
             """,
         )
+        history_label = "Hide History" if st.session_state.copilot_show_history else "View History"
+        if st.button(history_label, key="copilot_history_toggle", use_container_width=True):
+            if not st.session_state.copilot_show_history:
+                st.session_state.copilot_history_messages = merge_copilot_messages(
+                    st.session_state.copilot_history_messages,
+                    [
+                        *load_persisted_copilot_history(),
+                        *recover_visible_copilot_messages(),
+                    ],
+                )
+            st.session_state.copilot_show_history = not st.session_state.copilot_show_history
+            st.rerun()
 
         if "queued_copilot_question" in st.session_state:
             question = st.session_state.pop("queued_copilot_question")
             send_copilot_message(question)
 
-        st.html('<div class="chat-log">')
-        for message in st.session_state.copilot_messages[-8:]:
-            role = "user" if message["role"] == "user" else "assistant"
-            content = escape(message["content"]).replace("\n", "<br/>")
-            st.html(f'<div class="chat-bubble {role}">{content}</div>')
-            chart_url = media_url(message.get("chart_url"))
-            if chart_url:
-                st.image(
-                    chart_url,
-                    caption=message.get("chart_title") or "PropPilot chart",
-                    use_container_width=True,
-                )
-        st.html("</div>")
+        messages = (
+            st.session_state.copilot_history_messages
+            if st.session_state.copilot_show_history
+            else st.session_state.copilot_active_messages
+        )
+        render_copilot_messages(messages, show_empty=st.session_state.copilot_show_history)
 
-        col_a, col_b, col_c = st.columns(3)
-        if col_a.button("Objection", use_container_width=True):
-            st.session_state.queued_copilot_question = "What is the top objection today?"
-            st.rerun()
-        if col_b.button("Inventory", use_container_width=True):
-            st.session_state.queued_copilot_question = "Which inventory should I push today?"
-            st.rerun()
-        if col_c.button("CPs", use_container_width=True):
-            st.session_state.queued_copilot_question = "Which channel partners need attention?"
+        quick_question = st.pills(
+            "Suggested questions",
+            [
+                "What changed since yesterday?",
+                "What is the top objection today?",
+                "Which inventory should I push today?",
+                "Where are bookings slowing down?",
+                "Which channel partners need attention?",
+                "What should my team do next?",
+            ],
+            key=f"buildr_suggestion_pills_{st.session_state.buildr_suggestion_round}",
+            label_visibility="collapsed",
+            width="stretch",
+        )
+        if quick_question:
+            st.session_state.buildr_suggestion_round += 1
+            st.session_state.queued_copilot_question = quick_question
             st.rerun()
 
         with st.form("copilot_chat_form", clear_on_submit=True):
@@ -1101,25 +1257,147 @@ def render_copilot_widget() -> None:
             st.rerun()
 
 
+def init_copilot_state() -> None:
+    greeting_message = {"role": "assistant", "content": COPILOT_GREETING}
+
+    if "copilot_history_messages" not in st.session_state:
+        persisted_messages = load_persisted_copilot_history()
+        st.session_state.copilot_history_messages = merge_copilot_messages(
+            recover_visible_copilot_messages(),
+            persisted_messages,
+        )
+    if "copilot_active_messages" not in st.session_state:
+        st.session_state.copilot_active_messages = [greeting_message]
+    if "copilot_show_history" not in st.session_state:
+        st.session_state.copilot_show_history = False
+    if "buildr_suggestion_round" not in st.session_state:
+        st.session_state.buildr_suggestion_round = 0
+    st.session_state.copilot_active_messages = normalize_copilot_messages(
+        st.session_state.copilot_active_messages or [greeting_message]
+    )
+    st.session_state.copilot_history_messages = normalize_copilot_messages(
+        st.session_state.copilot_history_messages
+    )
+
+
+def render_copilot_messages(messages: list[dict[str, Any]], show_empty: bool = False) -> None:
+    if show_empty and not messages:
+        st.html(
+            '<div class="chat-log">'
+            '<div class="chat-history-empty">No previous Buildr history yet.</div>'
+            "</div>"
+        )
+        return
+
+    parts: list[str] = []
+    for message in messages[-8:]:
+        role = "user" if message["role"] == "user" else "assistant"
+        content = escape(str(message.get("content") or "")).replace("\n", "<br/>")
+        parts.append(f'<div class="chat-bubble {role}">{content}</div>')
+        chart_url = media_url(message.get("chart_url"))
+        if chart_url:
+            caption = escape(str(message.get("chart_title") or "Buildr chart"))
+            parts.append(
+                '<div class="chat-chart-card">'
+                f'<img src="{escape(chart_url, quote=True)}" alt="{caption}">'
+                f'<div class="chat-chart-caption">{caption}</div>'
+                "</div>"
+            )
+    st.html(f'<div class="chat-log">{"".join(parts)}</div>')
+
+
+def normalize_copilot_messages(messages: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    normalized = []
+    for message in messages:
+        updated = dict(message)
+        for key in ("content", "chart_title"):
+            if key in updated and isinstance(updated[key], str):
+                updated[key] = updated[key].replace("Anarock PropPilot", "Anarock Buildr").replace(
+                    "PropPilot", "Buildr"
+                )
+        if updated.get("role") == "assistant" and str(updated.get("content") or "").strip() in LEGACY_COPILOT_GREETINGS:
+            updated["content"] = COPILOT_GREETING
+        normalized.append(updated)
+    return normalized
+
+
+def load_persisted_copilot_history() -> list[dict[str, Any]]:
+    payload = api_get("/chat-history?limit=50")
+    if not payload:
+        return []
+    items = payload.get("items") or []
+    if not isinstance(items, list):
+        return []
+    return normalize_copilot_messages([item for item in items if isinstance(item, dict)])
+
+
+def recover_visible_copilot_messages() -> list[dict[str, Any]]:
+    recovered: list[dict[str, Any]] = []
+    for key in ("copilot_messages", "copilot_active_messages"):
+        stored_messages = st.session_state.get(key, [])
+        if isinstance(stored_messages, list):
+            recovered.extend(message for message in stored_messages if isinstance(message, dict))
+    return [
+        message
+        for message in normalize_copilot_messages(recovered)
+        if not (
+            message.get("role") == "assistant"
+            and str(message.get("content") or "").strip() in LEGACY_COPILOT_GREETINGS
+        )
+    ]
+
+
+def persist_copilot_messages(messages: list[dict[str, Any]]) -> None:
+    api_post("/chat-history", {"messages": messages})
+
+
+def merge_copilot_messages(
+    existing: list[dict[str, Any]],
+    incoming: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    merged: list[dict[str, Any]] = []
+    seen: set[tuple[str, str, str | None]] = set()
+    for message in normalize_copilot_messages([*existing, *incoming]):
+        key = (
+            str(message.get("role") or ""),
+            str(message.get("content") or ""),
+            message.get("chart_url"),
+        )
+        if key in seen:
+            continue
+        seen.add(key)
+        merged.append(message)
+    return merged[-50:]
+
+
+def buildr_timestamp() -> str:
+    return datetime.now(timezone.utc).isoformat()
+
+
 def send_copilot_message(question: str) -> None:
-    st.session_state.copilot_messages.append({"role": "user", "content": question})
+    init_copilot_state()
+    user_message = {"role": "user", "content": question, "created_at": buildr_timestamp()}
+    st.session_state.copilot_active_messages.append(user_message)
+    st.session_state.copilot_history_messages.append(user_message)
     result = api_post("/ask", {"question": question})
     if not result:
-        answer = "I am not able to reach Anarock PropPilot right now. Please try again in a moment."
+        answer = "I am not able to reach Anarock Buildr right now. Please try again in a moment."
         chart_url = None
         chart_title = None
     else:
         answer = clean_answer(str(result.get("answer") or "I do not have a clear answer for that yet."))
         chart_url = result.get("chart_url")
         chart_title = result.get("chart_title")
-    st.session_state.copilot_messages.append(
-        {
-            "role": "assistant",
-            "content": answer,
-            "chart_url": chart_url,
-            "chart_title": chart_title,
-        }
-    )
+    assistant_message = {
+        "role": "assistant",
+        "content": answer,
+        "chart_url": chart_url,
+        "chart_title": chart_title,
+        "created_at": buildr_timestamp(),
+    }
+    st.session_state.copilot_active_messages.append(assistant_message)
+    st.session_state.copilot_history_messages.append(assistant_message)
+    persist_copilot_messages([user_message, assistant_message])
 
 
 render_global_styles()
