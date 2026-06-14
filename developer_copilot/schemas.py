@@ -17,6 +17,10 @@ class AskResponse(BaseModel):
     data_source: str
     model: str
     used_mock: bool
+    chart_url: str | None = None
+    chart_title: str | None = None
+    chart_type: str | None = None
+    chart_mime_type: str | None = None
 
 
 class GenerateActionRequest(BaseModel):
