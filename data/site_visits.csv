@@ -1,0 +1,415 @@
+id,lead_id,visit_date_time,status,visit_note
+8001,1002,2026-01-03 10:00:00,done,Completed site visit before booking conversion.
+8002,1005,2026-01-04 11:15:00,done,Completed site visit; buyer moved into final negotiation.
+8003,1007,2026-01-05 12:30:00,done,Completed site visit; lead moved to Visit Done.
+8004,1010,2026-01-06 13:45:00,done,Completed site visit before booking conversion.
+8005,1014,2026-01-07 14:00:00,done,Completed site visit; lead moved to Visit Done.
+8006,1015,2026-01-08 15:15:00,done,Completed site visit; buyer moved into final negotiation.
+8007,1016,2026-01-09 16:30:00,done,Completed site visit before booking conversion.
+8008,1023,2026-01-10 17:45:00,done,Completed site visit; lead moved to Visit Done.
+8009,1024,2026-01-11 10:00:00,done,Completed site visit; buyer moved into final negotiation.
+8010,1025,2026-01-12 11:15:00,done,Completed site visit before booking conversion.
+8011,1032,2026-01-13 12:30:00,done,Completed site visit; lead moved to Visit Done.
+8012,1033,2026-01-14 13:45:00,done,Completed site visit; buyer moved into final negotiation.
+8013,1034,2026-01-15 14:00:00,done,Completed site visit before booking conversion.
+8014,1041,2026-01-16 15:15:00,done,Completed site visit; lead moved to Visit Done.
+8015,1042,2026-01-17 16:30:00,done,Completed site visit; buyer moved into final negotiation.
+8016,1043,2026-01-18 17:45:00,done,Completed site visit before booking conversion.
+8017,1050,2026-01-19 10:00:00,done,Completed site visit; lead moved to Visit Done.
+8018,1051,2026-01-20 11:15:00,done,Completed site visit; buyer moved into final negotiation.
+8019,1052,2026-01-21 12:30:00,done,Completed site visit before booking conversion.
+8020,1059,2026-01-22 13:45:00,done,Completed site visit; lead moved to Visit Done.
+8021,1060,2026-01-23 14:00:00,done,Completed site visit; buyer moved into final negotiation.
+8022,1061,2026-01-24 15:15:00,done,Completed site visit before booking conversion.
+8023,1068,2026-01-25 16:30:00,done,Completed site visit; lead moved to Visit Done.
+8024,1069,2026-01-26 17:45:00,done,Completed site visit; buyer moved into final negotiation.
+8025,1070,2026-01-27 10:00:00,done,Completed site visit before booking conversion.
+8026,1077,2026-01-28 11:15:00,done,Completed site visit; lead moved to Visit Done.
+8027,1078,2026-01-29 12:30:00,done,Completed site visit; buyer moved into final negotiation.
+8028,1079,2026-01-30 13:45:00,done,Completed site visit before booking conversion.
+8029,1086,2026-01-31 14:00:00,done,Completed site visit; lead moved to Visit Done.
+8030,1087,2026-02-01 15:15:00,done,Completed site visit; buyer moved into final negotiation.
+8031,1088,2026-02-02 16:30:00,done,Completed site visit before booking conversion.
+8032,1095,2026-02-03 17:45:00,done,Completed site visit; lead moved to Visit Done.
+8033,1096,2026-02-04 10:00:00,done,Completed site visit; buyer moved into final negotiation.
+8034,1097,2026-02-05 11:15:00,done,Completed site visit before booking conversion.
+8035,1104,2026-02-06 12:30:00,done,Completed site visit; lead moved to Visit Done.
+8036,1105,2026-02-07 13:45:00,done,Completed site visit; buyer moved into final negotiation.
+8037,1106,2026-02-08 14:00:00,done,Completed site visit before booking conversion.
+8038,1113,2026-02-09 15:15:00,done,Completed site visit; lead moved to Visit Done.
+8039,1114,2026-02-10 16:30:00,done,Completed site visit; buyer moved into final negotiation.
+8040,1115,2026-02-11 17:45:00,done,Completed site visit before booking conversion.
+8041,1122,2026-02-12 10:00:00,done,Completed site visit; lead moved to Visit Done.
+8042,1123,2026-02-13 11:15:00,done,Completed site visit; buyer moved into final negotiation.
+8043,1124,2026-02-14 12:30:00,done,Completed site visit before booking conversion.
+8044,1131,2026-02-15 13:45:00,done,Completed site visit; lead moved to Visit Done.
+8045,1132,2026-02-16 14:00:00,done,Completed site visit; buyer moved into final negotiation.
+8046,1133,2026-02-17 15:15:00,done,Completed site visit before booking conversion.
+8047,1140,2026-02-18 16:30:00,done,Completed site visit; lead moved to Visit Done.
+8048,1141,2026-02-19 17:45:00,done,Completed site visit; buyer moved into final negotiation.
+8049,1142,2026-02-20 10:00:00,done,Completed site visit before booking conversion.
+8050,1149,2026-02-21 11:15:00,done,Completed site visit; lead moved to Visit Done.
+8051,1150,2026-02-22 12:30:00,done,Completed site visit; buyer moved into final negotiation.
+8052,1151,2026-02-23 13:45:00,done,Completed site visit before booking conversion.
+8053,1158,2026-02-24 14:00:00,done,Completed site visit; lead moved to Visit Done.
+8054,1159,2026-02-25 15:15:00,done,Completed site visit; buyer moved into final negotiation.
+8055,1160,2026-02-26 16:30:00,done,Completed site visit before booking conversion.
+8056,1167,2026-02-27 17:45:00,done,Completed site visit; lead moved to Visit Done.
+8057,1168,2026-02-28 10:00:00,done,Completed site visit; buyer moved into final negotiation.
+8058,1169,2026-03-01 11:15:00,done,Completed site visit before booking conversion.
+8059,1176,2026-03-02 12:30:00,done,Completed site visit; lead moved to Visit Done.
+8060,1177,2026-03-03 13:45:00,done,Completed site visit; buyer moved into final negotiation.
+8061,1178,2026-03-04 14:00:00,done,Completed site visit before booking conversion.
+8062,1185,2026-03-05 15:15:00,done,Completed site visit; lead moved to Visit Done.
+8063,1186,2026-03-06 16:30:00,done,Completed site visit; buyer moved into final negotiation.
+8064,1187,2026-03-07 17:45:00,done,Completed site visit before booking conversion.
+8065,1194,2026-03-08 10:00:00,done,Completed site visit; lead moved to Visit Done.
+8066,1195,2026-03-09 11:15:00,done,Completed site visit; buyer moved into final negotiation.
+8067,1196,2026-03-10 12:30:00,done,Completed site visit before booking conversion.
+8068,1203,2026-03-11 13:45:00,done,Completed site visit; lead moved to Visit Done.
+8069,1204,2026-03-12 14:00:00,done,Completed site visit; buyer moved into final negotiation.
+8070,1205,2026-03-13 15:15:00,done,Completed site visit before booking conversion.
+8071,1212,2026-03-14 16:30:00,done,Completed site visit; lead moved to Visit Done.
+8072,1213,2026-03-15 17:45:00,done,Completed site visit; buyer moved into final negotiation.
+8073,1214,2026-03-16 10:00:00,done,Completed site visit before booking conversion.
+8074,1221,2026-03-17 11:15:00,done,Completed site visit; lead moved to Visit Done.
+8075,1222,2026-03-18 12:30:00,done,Completed site visit; buyer moved into final negotiation.
+8076,1223,2026-03-19 13:45:00,done,Completed site visit before booking conversion.
+8077,1230,2026-03-20 14:00:00,done,Completed site visit; lead moved to Visit Done.
+8078,1231,2026-03-21 15:15:00,done,Completed site visit; buyer moved into final negotiation.
+8079,1232,2026-03-22 16:30:00,done,Completed site visit before booking conversion.
+8080,1239,2026-03-23 17:45:00,done,Completed site visit; lead moved to Visit Done.
+8081,1240,2026-03-24 10:00:00,done,Completed site visit; buyer moved into final negotiation.
+8082,1241,2026-03-25 11:15:00,done,Completed site visit before booking conversion.
+8083,1248,2026-03-26 12:30:00,done,Completed site visit; lead moved to Visit Done.
+8084,1249,2026-03-27 13:45:00,done,Completed site visit; buyer moved into final negotiation.
+8085,1250,2026-03-28 14:00:00,done,Completed site visit before booking conversion.
+8086,1257,2026-03-29 15:15:00,done,Completed site visit; lead moved to Visit Done.
+8087,1258,2026-03-30 16:30:00,done,Completed site visit; buyer moved into final negotiation.
+8088,1259,2026-03-31 17:45:00,done,Completed site visit before booking conversion.
+8089,1266,2026-04-01 10:00:00,done,Completed site visit; lead moved to Visit Done.
+8090,1267,2026-04-02 11:15:00,done,Completed site visit; buyer moved into final negotiation.
+8091,1268,2026-04-03 12:30:00,done,Completed site visit before booking conversion.
+8092,1275,2026-04-04 13:45:00,done,Completed site visit; lead moved to Visit Done.
+8093,1276,2026-04-05 14:00:00,done,Completed site visit; buyer moved into final negotiation.
+8094,1277,2026-04-06 15:15:00,done,Completed site visit before booking conversion.
+8095,1284,2026-04-07 16:30:00,done,Completed site visit; lead moved to Visit Done.
+8096,1285,2026-04-08 17:45:00,done,Completed site visit; buyer moved into final negotiation.
+8097,1286,2026-04-09 10:00:00,done,Completed site visit before booking conversion.
+8098,1293,2026-04-10 11:15:00,done,Completed site visit; lead moved to Visit Done.
+8099,1294,2026-04-11 12:30:00,done,Completed site visit; buyer moved into final negotiation.
+8100,1295,2026-04-12 13:45:00,done,Completed site visit before booking conversion.
+8101,1302,2026-04-13 14:00:00,done,Completed site visit; lead moved to Visit Done.
+8102,1303,2026-04-14 15:15:00,done,Completed site visit; buyer moved into final negotiation.
+8103,1304,2026-04-15 16:30:00,done,Completed site visit before booking conversion.
+8104,1311,2026-04-16 17:45:00,done,Completed site visit; lead moved to Visit Done.
+8105,1312,2026-04-17 10:00:00,done,Completed site visit; buyer moved into final negotiation.
+8106,1313,2026-04-18 11:15:00,done,Completed site visit before booking conversion.
+8107,1320,2026-04-19 12:30:00,done,Completed site visit; lead moved to Visit Done.
+8108,1321,2026-04-20 13:45:00,done,Completed site visit; buyer moved into final negotiation.
+8109,1322,2026-04-21 14:00:00,done,Completed site visit before booking conversion.
+8110,1329,2026-04-22 15:15:00,done,Completed site visit; lead moved to Visit Done.
+8111,1330,2026-04-23 16:30:00,done,Completed site visit; buyer moved into final negotiation.
+8112,1331,2026-04-24 17:45:00,done,Completed site visit before booking conversion.
+8113,1338,2026-04-25 10:00:00,done,Completed site visit; lead moved to Visit Done.
+8114,1339,2026-04-26 11:15:00,done,Completed site visit; buyer moved into final negotiation.
+8115,1340,2026-04-27 12:30:00,done,Completed site visit before booking conversion.
+8116,1347,2026-04-28 13:45:00,done,Completed site visit; lead moved to Visit Done.
+8117,1348,2026-04-29 14:00:00,done,Completed site visit; buyer moved into final negotiation.
+8118,1349,2026-04-30 15:15:00,done,Completed site visit before booking conversion.
+8119,1356,2026-05-01 16:30:00,done,Completed site visit; lead moved to Visit Done.
+8120,1357,2026-05-02 17:45:00,done,Completed site visit; buyer moved into final negotiation.
+8121,1358,2026-01-03 10:00:00,done,Completed site visit before booking conversion.
+8122,1365,2026-01-04 11:15:00,done,Completed site visit; lead moved to Visit Done.
+8123,1366,2026-01-05 12:30:00,done,Completed site visit; buyer moved into final negotiation.
+8124,1367,2026-01-06 13:45:00,done,Completed site visit before booking conversion.
+8125,1374,2026-01-07 14:00:00,done,Completed site visit; lead moved to Visit Done.
+8126,1375,2026-01-08 15:15:00,done,Completed site visit; buyer moved into final negotiation.
+8127,1376,2026-01-09 16:30:00,done,Completed site visit before booking conversion.
+8128,1383,2026-01-10 17:45:00,done,Completed site visit; lead moved to Visit Done.
+8129,1384,2026-01-11 10:00:00,done,Completed site visit; buyer moved into final negotiation.
+8130,1385,2026-01-12 11:15:00,done,Completed site visit before booking conversion.
+8131,1392,2026-01-13 12:30:00,done,Completed site visit; lead moved to Visit Done.
+8132,1393,2026-01-14 13:45:00,done,Completed site visit; buyer moved into final negotiation.
+8133,1394,2026-01-15 14:00:00,done,Completed site visit before booking conversion.
+8134,1401,2026-01-16 15:15:00,done,Completed site visit; lead moved to Visit Done.
+8135,1402,2026-01-17 16:30:00,done,Completed site visit; buyer moved into final negotiation.
+8136,1403,2026-01-18 17:45:00,done,Completed site visit before booking conversion.
+8137,1410,2026-01-19 10:00:00,done,Completed site visit; lead moved to Visit Done.
+8138,1411,2026-01-20 11:15:00,done,Completed site visit; buyer moved into final negotiation.
+8139,1412,2026-01-21 12:30:00,done,Completed site visit before booking conversion.
+8140,1419,2026-01-22 13:45:00,done,Completed site visit; lead moved to Visit Done.
+8141,1420,2026-01-23 14:00:00,done,Completed site visit; buyer moved into final negotiation.
+8142,1421,2026-01-24 15:15:00,done,Completed site visit before booking conversion.
+8143,1428,2026-01-25 16:30:00,done,Completed site visit; lead moved to Visit Done.
+8144,1429,2026-01-26 17:45:00,done,Completed site visit; buyer moved into final negotiation.
+8145,1430,2026-01-27 10:00:00,done,Completed site visit before booking conversion.
+8146,1437,2026-01-28 11:15:00,done,Completed site visit; lead moved to Visit Done.
+8147,1438,2026-01-29 12:30:00,done,Completed site visit; buyer moved into final negotiation.
+8148,1439,2026-01-30 13:45:00,done,Completed site visit before booking conversion.
+8149,1446,2026-01-31 14:00:00,done,Completed site visit; lead moved to Visit Done.
+8150,1447,2026-02-01 15:15:00,done,Completed site visit; buyer moved into final negotiation.
+8151,1448,2026-02-02 16:30:00,done,Completed site visit before booking conversion.
+8152,1455,2026-02-03 17:45:00,done,Completed site visit; lead moved to Visit Done.
+8153,1456,2026-02-04 10:00:00,done,Completed site visit; buyer moved into final negotiation.
+8154,1457,2026-02-05 11:15:00,done,Completed site visit before booking conversion.
+8155,1464,2026-02-06 12:30:00,done,Completed site visit; lead moved to Visit Done.
+8156,1465,2026-02-07 13:45:00,done,Completed site visit; buyer moved into final negotiation.
+8157,1466,2026-02-08 14:00:00,done,Completed site visit before booking conversion.
+8158,1473,2026-02-09 15:15:00,done,Completed site visit; lead moved to Visit Done.
+8159,1474,2026-02-10 16:30:00,done,Completed site visit; buyer moved into final negotiation.
+8160,1475,2026-02-11 17:45:00,done,Completed site visit before booking conversion.
+8161,1482,2026-02-12 10:00:00,done,Completed site visit; lead moved to Visit Done.
+8162,1483,2026-02-13 11:15:00,done,Completed site visit; buyer moved into final negotiation.
+8163,1484,2026-02-14 12:30:00,done,Completed site visit before booking conversion.
+8164,1491,2026-02-15 13:45:00,done,Completed site visit; lead moved to Visit Done.
+8165,1492,2026-02-16 14:00:00,done,Completed site visit; buyer moved into final negotiation.
+8166,1493,2026-02-17 15:15:00,done,Completed site visit before booking conversion.
+8167,1500,2026-02-18 16:30:00,done,Completed site visit; lead moved to Visit Done.
+8168,1501,2026-02-19 17:45:00,done,Completed site visit; buyer moved into final negotiation.
+8169,1502,2026-02-20 10:00:00,done,Completed site visit before booking conversion.
+8170,1509,2026-02-21 11:15:00,done,Completed site visit; lead moved to Visit Done.
+8171,1510,2026-02-22 12:30:00,done,Completed site visit; buyer moved into final negotiation.
+8172,1511,2026-02-23 13:45:00,done,Completed site visit before booking conversion.
+8173,1518,2026-02-24 14:00:00,done,Completed site visit; lead moved to Visit Done.
+8174,1519,2026-02-25 15:15:00,done,Completed site visit; buyer moved into final negotiation.
+8175,1520,2026-02-26 16:30:00,done,Completed site visit before booking conversion.
+8176,1527,2026-02-27 17:45:00,done,Completed site visit; lead moved to Visit Done.
+8177,1528,2026-02-28 10:00:00,done,Completed site visit; buyer moved into final negotiation.
+8178,1529,2026-03-01 11:15:00,done,Completed site visit before booking conversion.
+8179,1536,2026-03-02 12:30:00,done,Completed site visit; lead moved to Visit Done.
+8180,1537,2026-03-03 13:45:00,done,Completed site visit; buyer moved into final negotiation.
+8181,1538,2026-03-04 14:00:00,done,Completed site visit before booking conversion.
+8182,1545,2026-03-05 15:15:00,done,Completed site visit; lead moved to Visit Done.
+8183,1546,2026-03-06 16:30:00,done,Completed site visit; buyer moved into final negotiation.
+8184,1547,2026-03-07 17:45:00,done,Completed site visit before booking conversion.
+8185,1554,2026-03-08 10:00:00,done,Completed site visit; lead moved to Visit Done.
+8186,1555,2026-03-09 11:15:00,done,Completed site visit; buyer moved into final negotiation.
+8187,1556,2026-03-10 12:30:00,done,Completed site visit before booking conversion.
+8188,1563,2026-03-11 13:45:00,done,Completed site visit; lead moved to Visit Done.
+8189,1564,2026-03-12 14:00:00,done,Completed site visit; buyer moved into final negotiation.
+8190,1565,2026-03-13 15:15:00,done,Completed site visit before booking conversion.
+8191,1572,2026-03-14 16:30:00,done,Completed site visit; lead moved to Visit Done.
+8192,1573,2026-03-15 17:45:00,done,Completed site visit; buyer moved into final negotiation.
+8193,1574,2026-03-16 10:00:00,done,Completed site visit before booking conversion.
+8194,1581,2026-03-17 11:15:00,done,Completed site visit; lead moved to Visit Done.
+8195,1582,2026-03-18 12:30:00,done,Completed site visit; buyer moved into final negotiation.
+8196,1583,2026-03-19 13:45:00,done,Completed site visit before booking conversion.
+8197,1590,2026-03-20 14:00:00,done,Completed site visit; lead moved to Visit Done.
+8198,1591,2026-03-21 15:15:00,done,Completed site visit; buyer moved into final negotiation.
+8199,1592,2026-03-22 16:30:00,done,Completed site visit before booking conversion.
+8200,1599,2026-03-23 17:45:00,done,Completed site visit; lead moved to Visit Done.
+8201,1600,2026-03-24 10:00:00,done,Completed site visit; buyer moved into final negotiation.
+8202,1601,2026-03-25 11:15:00,done,Completed site visit before booking conversion.
+8203,1608,2026-03-26 12:30:00,done,Completed site visit; lead moved to Visit Done.
+8204,1609,2026-03-27 13:45:00,done,Completed site visit; buyer moved into final negotiation.
+8205,1610,2026-03-28 14:00:00,done,Completed site visit before booking conversion.
+8206,1617,2026-03-29 15:15:00,done,Completed site visit; lead moved to Visit Done.
+8207,1618,2026-03-30 16:30:00,done,Completed site visit; buyer moved into final negotiation.
+8208,1619,2026-03-31 17:45:00,done,Completed site visit before booking conversion.
+8209,1626,2026-04-01 10:00:00,done,Completed site visit; lead moved to Visit Done.
+8210,1627,2026-04-02 11:15:00,done,Completed site visit; buyer moved into final negotiation.
+8211,1628,2026-04-03 12:30:00,done,Completed site visit before booking conversion.
+8212,1635,2026-04-04 13:45:00,done,Completed site visit; lead moved to Visit Done.
+8213,1636,2026-04-05 14:00:00,done,Completed site visit; buyer moved into final negotiation.
+8214,1637,2026-04-06 15:15:00,done,Completed site visit before booking conversion.
+8215,1644,2026-04-07 16:30:00,done,Completed site visit; lead moved to Visit Done.
+8216,1645,2026-04-08 17:45:00,done,Completed site visit; buyer moved into final negotiation.
+8217,1646,2026-04-09 10:00:00,done,Completed site visit before booking conversion.
+8218,1653,2026-04-10 11:15:00,done,Completed site visit; lead moved to Visit Done.
+8219,1654,2026-04-11 12:30:00,done,Completed site visit; buyer moved into final negotiation.
+8220,1655,2026-04-12 13:45:00,done,Completed site visit before booking conversion.
+8221,1662,2026-04-13 14:00:00,done,Completed site visit; lead moved to Visit Done.
+8222,1663,2026-04-14 15:15:00,done,Completed site visit; buyer moved into final negotiation.
+8223,1664,2026-04-15 16:30:00,done,Completed site visit before booking conversion.
+8224,1671,2026-04-16 17:45:00,done,Completed site visit; lead moved to Visit Done.
+8225,1672,2026-04-17 10:00:00,done,Completed site visit; buyer moved into final negotiation.
+8226,1673,2026-04-18 11:15:00,done,Completed site visit before booking conversion.
+8227,1680,2026-04-19 12:30:00,done,Completed site visit; lead moved to Visit Done.
+8228,1681,2026-04-20 13:45:00,done,Completed site visit; buyer moved into final negotiation.
+8229,1682,2026-04-21 14:00:00,done,Completed site visit before booking conversion.
+8230,1689,2026-04-22 15:15:00,done,Completed site visit; lead moved to Visit Done.
+8231,1690,2026-04-23 16:30:00,done,Completed site visit; buyer moved into final negotiation.
+8232,1691,2026-04-24 17:45:00,done,Completed site visit before booking conversion.
+8233,1698,2026-04-25 10:00:00,done,Completed site visit; lead moved to Visit Done.
+8234,1699,2026-04-26 11:15:00,done,Completed site visit; buyer moved into final negotiation.
+8235,1700,2026-04-27 12:30:00,done,Completed site visit before booking conversion.
+8236,1707,2026-04-28 13:45:00,done,Completed site visit; lead moved to Visit Done.
+8237,1708,2026-04-29 14:00:00,done,Completed site visit; buyer moved into final negotiation.
+8238,1709,2026-04-30 15:15:00,done,Completed site visit before booking conversion.
+8239,1716,2026-05-01 16:30:00,done,Completed site visit; lead moved to Visit Done.
+8240,1717,2026-05-02 17:45:00,done,Completed site visit; buyer moved into final negotiation.
+8241,1718,2026-01-03 10:00:00,done,Completed site visit before booking conversion.
+8242,1725,2026-01-04 11:15:00,done,Completed site visit; lead moved to Visit Done.
+8243,1726,2026-01-05 12:30:00,done,Completed site visit; buyer moved into final negotiation.
+8244,1727,2026-01-06 13:45:00,done,Completed site visit before booking conversion.
+8245,1734,2026-01-07 14:00:00,done,Completed site visit; lead moved to Visit Done.
+8246,1735,2026-01-08 15:15:00,done,Completed site visit; buyer moved into final negotiation.
+8247,1736,2026-01-09 16:30:00,done,Completed site visit before booking conversion.
+8248,1743,2026-01-10 17:45:00,done,Completed site visit; lead moved to Visit Done.
+8249,1744,2026-01-11 10:00:00,done,Completed site visit; buyer moved into final negotiation.
+8250,1745,2026-01-12 11:15:00,done,Completed site visit before booking conversion.
+8251,1752,2026-01-13 12:30:00,done,Completed site visit; lead moved to Visit Done.
+8252,1753,2026-01-14 13:45:00,done,Completed site visit; buyer moved into final negotiation.
+8253,1754,2026-01-15 14:00:00,done,Completed site visit before booking conversion.
+8254,1761,2026-01-16 15:15:00,done,Completed site visit; lead moved to Visit Done.
+8255,1762,2026-01-17 16:30:00,done,Completed site visit; buyer moved into final negotiation.
+8256,1763,2026-01-18 17:45:00,done,Completed site visit before booking conversion.
+8257,1770,2026-01-19 10:00:00,done,Completed site visit; lead moved to Visit Done.
+8258,1771,2026-01-20 11:15:00,done,Completed site visit; buyer moved into final negotiation.
+8259,1772,2026-01-21 12:30:00,done,Completed site visit before booking conversion.
+8260,1779,2026-01-22 13:45:00,done,Completed site visit; lead moved to Visit Done.
+8261,1780,2026-01-23 14:00:00,done,Completed site visit; buyer moved into final negotiation.
+8262,1781,2026-01-24 15:15:00,done,Completed site visit before booking conversion.
+8263,1788,2026-01-25 16:30:00,done,Completed site visit; lead moved to Visit Done.
+8264,1789,2026-01-26 17:45:00,done,Completed site visit; buyer moved into final negotiation.
+8265,1790,2026-01-27 10:00:00,done,Completed site visit before booking conversion.
+8266,1797,2026-01-28 11:15:00,done,Completed site visit; lead moved to Visit Done.
+8267,1798,2026-01-29 12:30:00,done,Completed site visit; buyer moved into final negotiation.
+8268,1799,2026-01-30 13:45:00,done,Completed site visit before booking conversion.
+8269,1806,2026-01-31 14:00:00,done,Completed site visit; lead moved to Visit Done.
+8270,1807,2026-02-01 15:15:00,done,Completed site visit; buyer moved into final negotiation.
+8271,1808,2026-02-02 16:30:00,done,Completed site visit before booking conversion.
+8272,1815,2026-02-03 17:45:00,done,Completed site visit; lead moved to Visit Done.
+8273,1816,2026-02-04 10:00:00,done,Completed site visit; buyer moved into final negotiation.
+8274,1817,2026-02-05 11:15:00,done,Completed site visit before booking conversion.
+8275,1824,2026-02-06 12:30:00,done,Completed site visit; lead moved to Visit Done.
+8276,1825,2026-02-07 13:45:00,done,Completed site visit; buyer moved into final negotiation.
+8277,1826,2026-02-08 14:00:00,done,Completed site visit before booking conversion.
+8278,1833,2026-02-09 15:15:00,done,Completed site visit; lead moved to Visit Done.
+8279,1834,2026-02-10 16:30:00,done,Completed site visit; buyer moved into final negotiation.
+8280,1835,2026-02-11 17:45:00,done,Completed site visit before booking conversion.
+8281,1842,2026-02-12 10:00:00,done,Completed site visit; lead moved to Visit Done.
+8282,1843,2026-02-13 11:15:00,done,Completed site visit; buyer moved into final negotiation.
+8283,1844,2026-02-14 12:30:00,done,Completed site visit before booking conversion.
+8284,1851,2026-02-15 13:45:00,done,Completed site visit; lead moved to Visit Done.
+8285,1852,2026-02-16 14:00:00,done,Completed site visit; buyer moved into final negotiation.
+8286,1853,2026-02-17 15:15:00,done,Completed site visit before booking conversion.
+8287,1860,2026-02-18 16:30:00,done,Completed site visit; lead moved to Visit Done.
+8288,1861,2026-02-19 17:45:00,done,Completed site visit; buyer moved into final negotiation.
+8289,1862,2026-02-20 10:00:00,done,Completed site visit before booking conversion.
+8290,1869,2026-02-21 11:15:00,done,Completed site visit; lead moved to Visit Done.
+8291,1870,2026-02-22 12:30:00,done,Completed site visit; buyer moved into final negotiation.
+8292,1871,2026-02-23 13:45:00,done,Completed site visit before booking conversion.
+8293,1878,2026-02-24 14:00:00,done,Completed site visit; lead moved to Visit Done.
+8294,1879,2026-02-25 15:15:00,done,Completed site visit; buyer moved into final negotiation.
+8295,1880,2026-02-26 16:30:00,done,Completed site visit before booking conversion.
+8296,1887,2026-02-27 17:45:00,done,Completed site visit; lead moved to Visit Done.
+8297,1888,2026-02-28 10:00:00,done,Completed site visit; buyer moved into final negotiation.
+8298,1889,2026-03-01 11:15:00,done,Completed site visit before booking conversion.
+8299,1896,2026-03-02 12:30:00,done,Completed site visit; lead moved to Visit Done.
+8300,1897,2026-03-03 13:45:00,done,Completed site visit; buyer moved into final negotiation.
+8301,1898,2026-03-04 14:00:00,done,Completed site visit before booking conversion.
+8302,1905,2026-03-05 15:15:00,done,Completed site visit; lead moved to Visit Done.
+8303,1906,2026-03-06 16:30:00,done,Completed site visit; buyer moved into final negotiation.
+8304,1907,2026-03-07 17:45:00,done,Completed site visit before booking conversion.
+8305,1914,2026-03-08 10:00:00,done,Completed site visit; lead moved to Visit Done.
+8306,1915,2026-03-09 11:15:00,done,Completed site visit; buyer moved into final negotiation.
+8307,1916,2026-03-10 12:30:00,done,Completed site visit before booking conversion.
+8308,1923,2026-03-11 13:45:00,done,Completed site visit; lead moved to Visit Done.
+8309,1924,2026-03-12 14:00:00,done,Completed site visit; buyer moved into final negotiation.
+8310,1925,2026-03-13 15:15:00,done,Completed site visit before booking conversion.
+8311,1932,2026-03-14 16:30:00,done,Completed site visit; lead moved to Visit Done.
+8312,1933,2026-03-15 17:45:00,done,Completed site visit; buyer moved into final negotiation.
+8313,1934,2026-03-16 10:00:00,done,Completed site visit before booking conversion.
+8314,1941,2026-03-17 11:15:00,done,Completed site visit; lead moved to Visit Done.
+8315,1942,2026-03-18 12:30:00,done,Completed site visit; buyer moved into final negotiation.
+8316,1943,2026-03-19 13:45:00,done,Completed site visit before booking conversion.
+8317,1950,2026-03-20 14:00:00,done,Completed site visit; lead moved to Visit Done.
+8318,1951,2026-03-21 15:15:00,done,Completed site visit; buyer moved into final negotiation.
+8319,1952,2026-03-22 16:30:00,done,Completed site visit before booking conversion.
+8320,1959,2026-03-23 17:45:00,done,Completed site visit; lead moved to Visit Done.
+8321,1960,2026-03-24 10:00:00,done,Completed site visit; buyer moved into final negotiation.
+8322,1961,2026-03-25 11:15:00,done,Completed site visit before booking conversion.
+8323,1968,2026-03-26 12:30:00,done,Completed site visit; lead moved to Visit Done.
+8324,1969,2026-03-27 13:45:00,done,Completed site visit; buyer moved into final negotiation.
+8325,1970,2026-03-28 14:00:00,done,Completed site visit before booking conversion.
+8326,1977,2026-03-29 15:15:00,done,Completed site visit; lead moved to Visit Done.
+8327,1978,2026-03-30 16:30:00,done,Completed site visit; buyer moved into final negotiation.
+8328,1979,2026-03-31 17:45:00,done,Completed site visit before booking conversion.
+8329,1986,2026-04-01 10:00:00,done,Completed site visit; lead moved to Visit Done.
+8330,1987,2026-04-02 11:15:00,done,Completed site visit; buyer moved into final negotiation.
+8331,1988,2026-04-03 12:30:00,done,Completed site visit before booking conversion.
+8332,1995,2026-04-04 13:45:00,done,Completed site visit; lead moved to Visit Done.
+8333,1996,2026-04-05 14:00:00,done,Completed site visit; buyer moved into final negotiation.
+8334,1997,2026-04-06 15:15:00,done,Completed site visit before booking conversion.
+8335,1004,2026-04-07 16:30:00,scheduled,Site visit is scheduled with the buyer.
+8336,1012,2026-04-08 17:45:00,scheduled,Site visit is scheduled with the buyer.
+8337,1013,2026-04-09 10:00:00,cancelled,Site visit was cancelled and needs a follow-up.
+8338,1021,2026-04-10 11:15:00,scheduled,Site visit is scheduled with the buyer.
+8339,1022,2026-04-11 12:30:00,scheduled,Site visit is scheduled with the buyer.
+8340,1030,2026-04-12 13:45:00,scheduled,Site visit is scheduled with the buyer.
+8341,1031,2026-04-13 14:00:00,cancelled,Site visit was cancelled and needs a follow-up.
+8342,1039,2026-04-14 15:15:00,scheduled,Site visit is scheduled with the buyer.
+8343,1040,2026-04-15 16:30:00,scheduled,Site visit is scheduled with the buyer.
+8344,1048,2026-04-16 17:45:00,scheduled,Site visit is scheduled with the buyer.
+8345,1049,2026-04-17 10:00:00,cancelled,Site visit was cancelled and needs a follow-up.
+8346,1057,2026-04-18 11:15:00,scheduled,Site visit is scheduled with the buyer.
+8347,1058,2026-04-19 12:30:00,scheduled,Site visit is scheduled with the buyer.
+8348,1066,2026-04-20 13:45:00,scheduled,Site visit is scheduled with the buyer.
+8349,1067,2026-04-21 14:00:00,cancelled,Site visit was cancelled and needs a follow-up.
+8350,1075,2026-04-22 15:15:00,scheduled,Site visit is scheduled with the buyer.
+8351,1076,2026-04-23 16:30:00,scheduled,Site visit is scheduled with the buyer.
+8352,1084,2026-04-24 17:45:00,scheduled,Site visit is scheduled with the buyer.
+8353,1085,2026-04-25 10:00:00,cancelled,Site visit was cancelled and needs a follow-up.
+8354,1093,2026-04-26 11:15:00,scheduled,Site visit is scheduled with the buyer.
+8355,1094,2026-04-27 12:30:00,scheduled,Site visit is scheduled with the buyer.
+8356,1102,2026-04-28 13:45:00,scheduled,Site visit is scheduled with the buyer.
+8357,1103,2026-04-29 14:00:00,cancelled,Site visit was cancelled and needs a follow-up.
+8358,1111,2026-04-30 15:15:00,scheduled,Site visit is scheduled with the buyer.
+8359,1112,2026-05-01 16:30:00,scheduled,Site visit is scheduled with the buyer.
+8360,1120,2026-05-02 17:45:00,scheduled,Site visit is scheduled with the buyer.
+8361,1121,2026-01-03 10:00:00,cancelled,Site visit was cancelled and needs a follow-up.
+8362,1129,2026-01-04 11:15:00,scheduled,Site visit is scheduled with the buyer.
+8363,1130,2026-01-05 12:30:00,scheduled,Site visit is scheduled with the buyer.
+8364,1138,2026-01-06 13:45:00,scheduled,Site visit is scheduled with the buyer.
+8365,1139,2026-01-07 14:00:00,cancelled,Site visit was cancelled and needs a follow-up.
+8366,1147,2026-01-08 15:15:00,scheduled,Site visit is scheduled with the buyer.
+8367,1148,2026-01-09 16:30:00,scheduled,Site visit is scheduled with the buyer.
+8368,1156,2026-01-10 17:45:00,scheduled,Site visit is scheduled with the buyer.
+8369,1157,2026-01-11 10:00:00,cancelled,Site visit was cancelled and needs a follow-up.
+8370,1165,2026-01-12 11:15:00,scheduled,Site visit is scheduled with the buyer.
+8371,1166,2026-01-13 12:30:00,scheduled,Site visit is scheduled with the buyer.
+8372,1174,2026-01-14 13:45:00,scheduled,Site visit is scheduled with the buyer.
+8373,1175,2026-01-15 14:00:00,cancelled,Site visit was cancelled and needs a follow-up.
+8374,1183,2026-01-16 15:15:00,scheduled,Site visit is scheduled with the buyer.
+8375,1184,2026-01-17 16:30:00,scheduled,Site visit is scheduled with the buyer.
+8376,1192,2026-01-18 17:45:00,scheduled,Site visit is scheduled with the buyer.
+8377,1193,2026-01-19 10:00:00,cancelled,Site visit was cancelled and needs a follow-up.
+8378,1201,2026-01-20 11:15:00,scheduled,Site visit is scheduled with the buyer.
+8379,1202,2026-01-21 12:30:00,scheduled,Site visit is scheduled with the buyer.
+8380,1210,2026-01-22 13:45:00,scheduled,Site visit is scheduled with the buyer.
+8381,1211,2026-01-23 14:00:00,cancelled,Site visit was cancelled and needs a follow-up.
+8382,1219,2026-01-24 15:15:00,scheduled,Site visit is scheduled with the buyer.
+8383,1220,2026-01-25 16:30:00,scheduled,Site visit is scheduled with the buyer.
+8384,1228,2026-01-26 17:45:00,scheduled,Site visit is scheduled with the buyer.
+8385,1229,2026-01-27 10:00:00,cancelled,Site visit was cancelled and needs a follow-up.
+8386,1237,2026-01-28 11:15:00,scheduled,Site visit is scheduled with the buyer.
+8387,1238,2026-01-29 12:30:00,scheduled,Site visit is scheduled with the buyer.
+8388,1246,2026-01-30 13:45:00,scheduled,Site visit is scheduled with the buyer.
+8389,1247,2026-01-31 14:00:00,cancelled,Site visit was cancelled and needs a follow-up.
+8390,1255,2026-02-01 15:15:00,scheduled,Site visit is scheduled with the buyer.
+8391,1256,2026-02-02 16:30:00,scheduled,Site visit is scheduled with the buyer.
+8392,1264,2026-02-03 17:45:00,scheduled,Site visit is scheduled with the buyer.
+8393,1265,2026-02-04 10:00:00,cancelled,Site visit was cancelled and needs a follow-up.
+8394,1273,2026-02-05 11:15:00,scheduled,Site visit is scheduled with the buyer.
+8395,1274,2026-02-06 12:30:00,scheduled,Site visit is scheduled with the buyer.
+8396,1282,2026-02-07 13:45:00,scheduled,Site visit is scheduled with the buyer.
+8397,1283,2026-02-08 14:00:00,cancelled,Site visit was cancelled and needs a follow-up.
+8398,1291,2026-02-09 15:15:00,scheduled,Site visit is scheduled with the buyer.
+8399,1292,2026-02-10 16:30:00,scheduled,Site visit is scheduled with the buyer.
+8400,1300,2026-02-11 17:45:00,scheduled,Site visit is scheduled with the buyer.
+8401,1301,2026-02-12 10:00:00,cancelled,Site visit was cancelled and needs a follow-up.
+8402,1309,2026-02-13 11:15:00,scheduled,Site visit is scheduled with the buyer.
+8403,1310,2026-02-14 12:30:00,scheduled,Site visit is scheduled with the buyer.
+8404,1318,2026-02-15 13:45:00,scheduled,Site visit is scheduled with the buyer.
+8405,1319,2026-02-16 14:00:00,cancelled,Site visit was cancelled and needs a follow-up.
+8406,1327,2026-02-17 15:15:00,scheduled,Site visit is scheduled with the buyer.
+8407,1328,2026-02-18 16:30:00,scheduled,Site visit is scheduled with the buyer.
+8408,1336,2026-02-19 17:45:00,scheduled,Site visit is scheduled with the buyer.
+8409,1337,2026-02-20 10:00:00,cancelled,Site visit was cancelled and needs a follow-up.
+8410,1345,2026-02-21 11:15:00,scheduled,Site visit is scheduled with the buyer.
+8411,1346,2026-02-22 12:30:00,scheduled,Site visit is scheduled with the buyer.
+8412,1354,2026-02-23 13:45:00,scheduled,Site visit is scheduled with the buyer.
+8413,1355,2026-02-24 14:00:00,cancelled,Site visit was cancelled and needs a follow-up.
+8414,1363,2026-02-25 15:15:00,scheduled,Site visit is scheduled with the buyer.
