@@ -43,6 +43,12 @@ def answer_question(settings: Settings, project_data: ProjectData, question: str
     fallback = _fallback_answer(project_data, question)
     force_bullets = _wants_structured_answer(question)
     fallback["answer"] = _format_long_answer(fallback.get("answer", ""), force_bullets=force_bullets)
+    if _wants_fastest_configuration_answer(question):
+        return AITextResult(payload=fallback, model="deterministic-configuration-movement", used_mock=True)
+    if _wants_site_visit_booking_conversion_answer(question):
+        return AITextResult(payload=fallback, model="deterministic-sv-booking-conversion", used_mock=True)
+    if _wants_project_status_answer(question):
+        return AITextResult(payload=fallback, model="deterministic-project-status", used_mock=True)
     if not settings.openai_api_key:
         return AITextResult(payload=fallback, model="mock-reasoner", used_mock=True)
 
@@ -90,6 +96,7 @@ def _project_context(project_data: ProjectData, extra: dict[str, Any] | None = N
         "projects": project_data.projects[:30],
         "inventory": project_data.inventory[:20],
         "bookings": project_data.bookings[:30],
+        "site_visits": project_data.site_visits[:30],
         "channel_partners": project_data.channel_partners[:30],
         "computed_metrics": _computed_metrics(project_data),
         "data_source": project_data.source,
@@ -126,6 +133,12 @@ def _computed_metrics(project_data: ProjectData) -> dict[str, Any]:
         stage = str(row.get("stage") or "Unknown").strip() or "Unknown"
         project_stages[stage] = project_stages.get(stage, 0) + 1
 
+    site_visit_statuses: dict[str, int] = {}
+    for row in project_data.site_visits:
+        status = str(row.get("status") or "Unknown").strip() or "Unknown"
+        site_visit_statuses[status] = site_visit_statuses.get(status, 0) + 1
+    site_visit_conversion = _site_visit_booking_conversion(project_data)
+
     return {
         "inventory": {
             "rows": len(project_data.inventory),
@@ -138,6 +151,11 @@ def _computed_metrics(project_data: ProjectData) -> dict[str, Any]:
             "agreement_value": sum(_safe_float(row.get("agreement_value")) for row in project_data.bookings),
             "brokerage_amount": sum(_safe_float(row.get("brokerage_amount")) for row in project_data.bookings),
             "by_configuration": booking_by_configuration,
+        },
+        "site_visits": {
+            "count": len(project_data.site_visits),
+            "by_status": site_visit_statuses,
+            "booking_conversion": site_visit_conversion,
         },
         "leads_by_status": lead_statuses,
         "projects_by_stage": project_stages,
@@ -241,6 +259,56 @@ def _fallback_answer(project_data: ProjectData, question: str) -> dict[str, Any]
             }
         )
 
+    if _wants_site_visit_booking_conversion_answer(question):
+        conversion = _site_visit_booking_conversion(project_data)
+        return _normalize_answer(
+            {
+                "answer": (
+                    f"Your Site Visit to Booking conversion is {conversion['conversion_rate']:.0%}: "
+                    f"{conversion['booked_after_visit']} of {conversion['completed_site_visits']} completed site visits "
+                    "have turned into bookings."
+                ),
+                "evidence": [
+                    (
+                        f"{conversion['completed_site_visits']} completed site visits, "
+                        f"{conversion['booked_after_visit']} matched booking leads."
+                    )
+                ],
+            }
+        )
+
+    if _wants_fastest_configuration_answer(question):
+        movement = _configuration_movement(project_data)
+        if movement["top"] is None:
+            return _normalize_answer(
+                {
+                    "answer": "I do not see bookings by BHK configuration yet, so I cannot identify the fastest-moving configuration.",
+                    "evidence": ["No booking rows were available for configuration movement analysis."],
+                }
+            )
+        top = movement["top"]
+        answer = (
+            f"{top['configuration']} is moving fastest: "
+            f"{_plural(int(top['bookings']), 'booking')} worth {_money(float(top['agreement_value']))} booked value."
+        )
+        tied = [
+            item for item in movement["ranking"]
+            if item["configuration"] != top["configuration"] and item["bookings"] == top["bookings"]
+        ]
+        if tied:
+            tied_names = ", ".join(str(item["configuration"]) for item in tied)
+            verb = "has" if len(tied) == 1 else "have"
+            answer += (
+                f" {tied_names} also {verb} {_plural(int(top['bookings']), 'booking')}, "
+                f"but {top['configuration']} leads the tied group on booked value."
+            )
+        return _normalize_answer(
+            {
+                "answer": answer,
+                "evidence": [f"{len(project_data.bookings)} bookings grouped by BHK configuration."],
+            }
+        )
+
     if _has_any(question_lower, "booking", "booked", "agreement", "revenue", "brokerage", "sales value", "gmv"):
         booking_count = len(project_data.bookings)
         agreement_value = sum(_safe_float(row.get("agreement_value")) for row in project_data.bookings)
@@ -314,6 +382,22 @@ def _fallback_answer(project_data: ProjectData, question: str) -> dict[str, Any]
             }
         )
 
+    if _has_any(question_lower, "project", "stage"):
+        if project_data.projects:
+            project_statuses = _project_status_lines(project_data.projects)
+            return _normalize_answer(
+                {
+                    "answer": "Here are your project statuses:\n" + "\n".join(f"- {item}" for item in project_statuses),
+                    "evidence": [f"{len(project_data.projects)} projects linked to your developer record."],
+                }
+            )
+        return _normalize_answer(
+            {
+                "answer": "I do not see projects linked to your developer record yet.",
+                "evidence": ["Project table returned zero matched rows."],
+            }
+        )
+
     if _has_any(question_lower, "lead", "pipeline", "status"):
         statuses: dict[str, int] = {}
         for lead in project_data.leads:
@@ -327,21 +411,6 @@ def _fallback_answer(project_data: ProjectData, question: str) -> dict[str, Any]
                     + ", ".join(f"{status}: {count}" for status, count in top_statuses)
                 ),
                 "evidence": [f"Lead table filtered to developer {project_data.developer.get('developer_name') if project_data.developer else 'account'}."],
-            }
-        )
-
-    if _has_any(question_lower, "project", "stage"):
-        stages: dict[str, int] = {}
-        for project in project_data.projects:
-            stage = str(project.get("stage", "Unknown") or "Unknown")
-            stages[stage] = stages.get(stage, 0) + 1
-        return _normalize_answer(
-            {
-                "answer": (
-                    f"You have {len(project_data.projects)} active projects: "
-                    + ", ".join(f"{stage}: {count}" for stage, count in sorted(stages.items()))
-                ),
-                "evidence": [", ".join(str(project.get("name")) for project in project_data.projects[:3])],
             }
         )
 
@@ -373,6 +442,71 @@ def _has_any(text: str, *needles: str) -> bool:
     return any(needle in text for needle in needles)
 
 
+def _wants_site_visit_booking_conversion_answer(question: str) -> bool:
+    question_lower = " ".join(question.lower().strip().split())
+    mentions_site_visit = _has_any(question_lower, "site visit", "site visits", "sv", "visit", "visits")
+    mentions_booking = _has_any(question_lower, "booking", "booked", "bookings")
+    mentions_conversion = _has_any(question_lower, "conversion", "convert", "converted", "turned into", "turn into")
+    return mentions_site_visit and mentions_booking and mentions_conversion
+
+
+def _wants_fastest_configuration_answer(question: str) -> bool:
+    question_lower = " ".join(question.lower().strip().split())
+    mentions_configuration = _has_any(question_lower, "bhk", "configuration", "unit type", "bedroom")
+    asks_for_movement = _has_any(
+        question_lower,
+        "moving fastest",
+        "fastest",
+        "moving",
+        "selling",
+        "most booked",
+        "highest demand",
+        "best performing",
+        "performing best",
+    )
+    return mentions_configuration and asks_for_movement
+
+
+def _configuration_movement(project_data: ProjectData) -> dict[str, Any]:
+    grouped: dict[str, dict[str, float | str]] = {}
+    for booking in project_data.bookings:
+        configuration = str(booking.get("configuration") or "Unknown").strip() or "Unknown"
+        current = grouped.setdefault(
+            configuration,
+            {"configuration": configuration, "bookings": 0, "agreement_value": 0.0},
+        )
+        current["bookings"] = float(current["bookings"]) + 1
+        current["agreement_value"] = float(current["agreement_value"]) + _safe_float(booking.get("agreement_value"))
+
+    ranking = sorted(
+        grouped.values(),
+        key=lambda item: (float(item["bookings"]), float(item["agreement_value"])),
+        reverse=True,
+    )
+    return {"top": ranking[0] if ranking else None, "ranking": ranking}
+
+
+def _site_visit_booking_conversion(project_data: ProjectData) -> dict[str, Any]:
+    completed_visit_lead_ids = {
+        str(row.get("lead_id", "")).strip()
+        for row in project_data.site_visits
+        if str(row.get("status", "")).strip().lower() == "done" and str(row.get("lead_id", "")).strip()
+    }
+    booked_lead_ids = {
+        str(row.get("lead_id", "")).strip()
+        for row in project_data.bookings
+        if str(row.get("lead_id", "")).strip()
+    }
+    booked_after_visit = len(completed_visit_lead_ids & booked_lead_ids)
+    completed_site_visits = len(completed_visit_lead_ids)
+    conversion_rate = booked_after_visit / completed_site_visits if completed_site_visits else 0
+    return {
+        "completed_site_visits": completed_site_visits,
+        "booked_after_visit": booked_after_visit,
+        "conversion_rate": conversion_rate,
+    }
+
+
 def _top_inventory(inventory: list[dict[str, Any]], limit: int = 3) -> list[dict[str, Any]]:
     return sorted(
         inventory,
@@ -381,12 +515,26 @@ def _top_inventory(inventory: list[dict[str, Any]], limit: int = 3) -> list[dict
     )[:limit]
 
 
+def _project_status_lines(projects: list[dict[str, Any]]) -> list[str]:
+    lines: list[str] = []
+    for project in projects:
+        name = str(project.get("name") or f"Project {project.get('id', '')}").strip()
+        status = str(project.get("status") or project.get("stage") or "Status unavailable").strip()
+        lines.append(f"{name}: {status}")
+    return lines
+
+
 def _money(value: float) -> str:
     if value >= 10_000_000:
         return f"INR {value / 10_000_000:.2f} Cr"
     if value >= 100_000:
         return f"INR {value / 100_000:.2f} L"
     return f"INR {value:,.0f}"
+
+
+def _plural(count: int, noun: str) -> str:
+    suffix = "" if count == 1 else "s"
+    return f"{count} {noun}{suffix}"
 
 
 def _safe_float(value: Any) -> float:
@@ -473,14 +621,33 @@ def _wants_structured_answer(question: str) -> bool:
         "detailed",
         "highlights",
         "last week",
+        "this week",
+        "week",
         "summary",
         "summarize",
         "performance",
+        "performing",
+        "perform",
         "compare",
         "comparison",
+        "status",
         "trend",
         "why",
         "what changed",
+    )
+
+
+def _wants_project_status_answer(question: str) -> bool:
+    question_lower = " ".join(question.lower().strip().split())
+    return "project" in question_lower and _has_any(
+        question_lower,
+        "perform",
+        "performing",
+        "performance",
+        "status",
+        "stage",
+        "this week",
+        "week",
     )
 
 
