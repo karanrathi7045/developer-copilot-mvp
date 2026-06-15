@@ -1,4 +1,5 @@
 import csv
+import re
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest import TestCase, main
@@ -80,6 +81,74 @@ class DeveloperCopilotTest(TestCase):
 
         self.assertIn("\n- ", result.payload["answer"])
 
+    def test_project_performance_lists_each_project_status(self):
+        settings = Settings(scheduler_enabled=False)
+        project_data = select_developer_data(load_project_data(settings), 101)
+
+        result = answer_question(settings, project_data, "How is my project performing this week?")
+
+        self.assertIn("Here are your project statuses:", result.payload["answer"])
+        self.assertIn("- Ambrosia Heights Andheri West: Under Construction", result.payload["answer"])
+        self.assertIn("- Orchid Residences Dadar: Pre-Launch", result.payload["answer"])
+        self.assertNotIn("Planning: 5", result.payload["answer"])
+
+    def test_project_performance_bypasses_llm_when_openai_is_configured(self):
+        settings = Settings(openai_api_key="test-key", scheduler_enabled=False)
+        project_data = select_developer_data(load_project_data(settings), 101)
+
+        with patch("developer_copilot.ai._call_openai_json") as openai_call:
+            result = answer_question(settings, project_data, "How is my project performing this week?")
+
+        openai_call.assert_not_called()
+        self.assertEqual(result.model, "deterministic-project-status")
+        self.assertIn("- Ambrosia Heights Andheri West: Under Construction", result.payload["answer"])
+
+    def test_sv_to_booking_conversion_returns_visit_conversion(self):
+        settings = Settings(scheduler_enabled=False)
+        project_data = select_developer_data(load_project_data(settings), 101)
+
+        result = answer_question(settings, project_data, "What's my current SV to booking conversion rate?")
+
+        self.assertEqual(result.model, "deterministic-sv-booking-conversion")
+        self.assertIn("Site Visit to Booking conversion is 35%", result.payload["answer"])
+        self.assertIn("7 of 20 completed site visits", result.payload["answer"])
+        self.assertNotIn("agreement value", result.payload["answer"])
+
+    def test_sv_to_booking_conversion_bypasses_llm_when_openai_is_configured(self):
+        settings = Settings(openai_api_key="test-key", scheduler_enabled=False)
+        project_data = select_developer_data(load_project_data(settings), 101)
+
+        with patch("developer_copilot.ai._call_openai_json") as openai_call:
+            result = answer_question(settings, project_data, "How many visits turned into booking?")
+
+        openai_call.assert_not_called()
+        self.assertEqual(result.model, "deterministic-sv-booking-conversion")
+        self.assertIn("7 of 20 completed site visits", result.payload["answer"])
+
+    def test_fastest_bhk_configuration_uses_booking_velocity(self):
+        settings = Settings(scheduler_enabled=False)
+        project_data = select_developer_data(load_project_data(settings), 101)
+
+        result = answer_question(settings, project_data, "Which BHK configuration is moving fastest?")
+
+        self.assertEqual(result.model, "deterministic-configuration-movement")
+        self.assertIn("2 BHK is moving fastest", result.payload["answer"])
+        self.assertIn("2 bookings", result.payload["answer"])
+        self.assertIn("INR 2.96 Cr booked value", result.payload["answer"])
+        self.assertIn("leads the tied group", result.payload["answer"])
+        self.assertNotIn("Inventory to push", result.payload["answer"])
+
+    def test_fastest_bhk_configuration_bypasses_llm_when_openai_is_configured(self):
+        settings = Settings(openai_api_key="test-key", scheduler_enabled=False)
+        project_data = select_developer_data(load_project_data(settings), 101)
+
+        with patch("developer_copilot.ai._call_openai_json") as openai_call:
+            result = answer_question(settings, project_data, "Which BHK configuration is moving fastest?")
+
+        openai_call.assert_not_called()
+        self.assertEqual(result.model, "deterministic-configuration-movement")
+        self.assertIn("2 BHK is moving fastest", result.payload["answer"])
+
     def test_generates_action_from_mock_project_data(self):
         settings = Settings(scheduler_enabled=False)
         project_data = select_developer_data(load_project_data(settings), 101)
@@ -114,25 +183,84 @@ class DeveloperCopilotTest(TestCase):
         self.assertEqual(history[0]["role"], "user")
         self.assertEqual(history[1]["content"], "The top objection is budget.")
 
-    def test_mock_tables_have_100_rows_each(self):
-        for path in [
-            Path("data/developers.csv"),
-            Path("data/leads.csv"),
-            Path("data/projects.csv"),
-            Path("data/inventory.csv"),
-            Path("data/bookings.csv"),
-            Path("data/channel_partner.csv"),
-        ]:
+    def test_mock_tables_have_expected_row_counts(self):
+        expected_counts = {
+            Path("data/developers.csv"): 100,
+            Path("data/leads.csv"): 1000,
+            Path("data/projects.csv"): 100,
+            Path("data/inventory.csv"): 100,
+            Path("data/bookings.csv"): 100,
+            Path("data/site_visits.csv"): 414,
+            Path("data/channel_partner.csv"): 100,
+        }
+        for path, expected_count in expected_counts.items():
             with self.subTest(path=path):
                 with path.open(newline="", encoding="utf-8") as handle:
                     rows = list(csv.DictReader(handle))
-                self.assertEqual(len(rows), 100)
+                self.assertEqual(len(rows), expected_count)
+
+    def test_leads_have_allowed_statuses_and_failed_objections_only(self):
+        allowed_statuses = {
+            "Claimed",
+            "In CC",
+            "Interested",
+            "Meeting Done",
+            "Visit Done",
+            "Final Negotiation",
+            "Booking Done",
+            "Failed",
+            "Junk",
+        }
+
+        with Path("data/leads.csv").open(newline="", encoding="utf-8") as handle:
+            rows = list(csv.DictReader(handle))
+
+        self.assertEqual(set(rows[0]), {"id", "name", "status", "project_id", "objection"})
+        self.assertEqual({row["status"] for row in rows} - allowed_statuses, set())
+        self.assertFalse([row for row in rows if row["status"] == "Failed" and not row["objection"]])
+        self.assertFalse([row for row in rows if row["status"] != "Failed" and row["objection"]])
+
+    def test_site_visits_cover_visit_done_negotiation_and_booking_leads(self):
+        required_lead_statuses = {"Visit Done", "Final Negotiation", "Booking Done"}
+        allowed_visit_statuses = {"scheduled", "done", "cancelled"}
+
+        with Path("data/leads.csv").open(newline="", encoding="utf-8") as handle:
+            leads = list(csv.DictReader(handle))
+        with Path("data/bookings.csv").open(newline="", encoding="utf-8") as handle:
+            bookings = list(csv.DictReader(handle))
+        with Path("data/site_visits.csv").open(newline="", encoding="utf-8") as handle:
+            site_visits = list(csv.DictReader(handle))
+
+        self.assertEqual(set(site_visits[0]), {"id", "lead_id", "visit_date_time", "status", "visit_note"})
+        self.assertEqual({row["status"] for row in site_visits} - allowed_visit_statuses, set())
+
+        lead_ids = {row["id"] for row in leads}
+        visit_lead_ids = {row["lead_id"] for row in site_visits}
+        required_lead_ids = {
+            row["id"] for row in leads
+            if row["status"] in required_lead_statuses
+        }
+        booking_lead_ids = {row["lead_id"] for row in bookings}
+
+        self.assertEqual(visit_lead_ids - lead_ids, set())
+        self.assertEqual(required_lead_ids - visit_lead_ids, set())
+        self.assertGreaterEqual(len(booking_lead_ids & visit_lead_ids) / len(booking_lead_ids), 0.9)
+
+    def test_projects_have_distinct_names_and_allowed_stages(self):
+        allowed_stages = {"Under Construction", "Pre-Launch", "Ready to Move In"}
+        with Path("data/projects.csv").open(newline="", encoding="utf-8") as handle:
+            rows = list(csv.DictReader(handle))
+
+        names = [row["name"] for row in rows]
+        self.assertEqual(len(names), len(set(names)))
+        self.assertEqual({row["stage"] for row in rows} - allowed_stages, set())
+        self.assertFalse([name for name in names if re.search(r"\s\d+$", name)])
 
     def test_snowflake_seed_contains_table_loads(self):
         statements = split_sql(Path("data/snowflake_seed.sql").read_text(encoding="utf-8"))
 
-        self.assertEqual(len([item for item in statements if item.startswith("CREATE OR REPLACE TABLE")]), 6)
-        self.assertEqual(len([item for item in statements if item.startswith("INSERT INTO")]), 6)
+        self.assertEqual(len([item for item in statements if item.startswith("CREATE OR REPLACE TABLE")]), 7)
+        self.assertEqual(len([item for item in statements if item.startswith("INSERT INTO")]), 7)
 
     def test_twilio_mock_uses_developer_phone(self):
         status = send_whatsapp_briefing(
