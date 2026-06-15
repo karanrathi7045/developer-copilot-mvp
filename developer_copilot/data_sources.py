@@ -26,6 +26,7 @@ class ProjectData:
     projects: list[dict[str, Any]]
     inventory: list[dict[str, Any]]
     bookings: list[dict[str, Any]]
+    site_visits: list[dict[str, Any]]
     channel_partners: list[dict[str, Any]]
     developer: dict[str, Any] | None
     source: str
@@ -47,6 +48,7 @@ def load_project_data(settings: Settings) -> ProjectData:
         "projects": _read_csv(settings.projects_csv_path),
         "inventory": _read_csv(settings.inventory_csv_path),
         "bookings": _read_csv(settings.bookings_csv_path),
+        "site_visits": _read_csv(settings.site_visits_csv_path),
         "channel_partners": _read_csv(settings.channel_partner_csv_path),
     }
     _assert_mock_tables(tables)
@@ -94,6 +96,7 @@ def _load_snowflake_data(settings: Settings) -> ProjectData:
         projects = _fetch_table(connection, settings.snowflake_projects_table)
         inventory = _fetch_table(connection, settings.snowflake_inventory_table)
         bookings = _fetch_table(connection, settings.snowflake_bookings_table)
+        site_visits = _fetch_table(connection, settings.snowflake_site_visits_table)
         channel_partners = _fetch_table(connection, settings.snowflake_channel_partner_table)
     finally:
         connection.close()
@@ -104,6 +107,7 @@ def _load_snowflake_data(settings: Settings) -> ProjectData:
         projects=projects,
         inventory=inventory,
         bookings=bookings,
+        site_visits=site_visits,
         channel_partners=channel_partners,
         source="snowflake",
         status="live Snowflake",
@@ -116,6 +120,7 @@ def _build_project_data(
     projects: list[dict[str, Any]],
     inventory: list[dict[str, Any]],
     bookings: list[dict[str, Any]],
+    site_visits: list[dict[str, Any]],
     channel_partners: list[dict[str, Any]],
     source: str,
     status: str,
@@ -125,6 +130,7 @@ def _build_project_data(
     normalized_projects = [_lower_keys(row) for row in projects]
     normalized_inventory = [_lower_keys(row) for row in inventory]
     normalized_bookings = [_lower_keys(row) for row in bookings]
+    normalized_site_visits = [_lower_keys(row) for row in site_visits]
     normalized_channel_partners = [_lower_keys(row) for row in channel_partners]
 
     project_by_id = {_as_key(row.get("id")): row for row in normalized_projects}
@@ -165,6 +171,7 @@ def _build_project_data(
         projects=normalized_projects,
         inventory=enriched_inventory,
         bookings=normalized_bookings,
+        site_visits=normalized_site_visits,
         channel_partners=normalized_channel_partners,
         developer=None,
         source=source,
@@ -199,6 +206,10 @@ def select_developer_data(project_data: ProjectData, developer_id: int | None) -
         row for row in project_data.bookings
         if _as_key(row.get("lead_id")) in lead_ids
     ]
+    site_visits = [
+        row for row in project_data.site_visits
+        if _as_key(row.get("lead_id")) in lead_ids
+    ]
     inventory = [
         row for row in project_data.inventory
         if _as_key(row.get("project_id")) in project_ids
@@ -213,6 +224,7 @@ def select_developer_data(project_data: ProjectData, developer_id: int | None) -
         projects=projects,
         inventory=inventory,
         bookings=bookings,
+        site_visits=site_visits,
         channel_partners=channel_partners,
         source=project_data.source,
         status=f"{project_data.status}; filtered to developer {developer.get('developer_name')}",
@@ -224,6 +236,7 @@ def select_developer_data(project_data: ProjectData, developer_id: int | None) -
         projects=filtered.projects,
         inventory=filtered.inventory,
         bookings=filtered.bookings,
+        site_visits=filtered.site_visits,
         channel_partners=filtered.channel_partners,
         developer=developer,
         source=filtered.source,
@@ -288,7 +301,7 @@ def _analytics_conversations(
         project = project_by_id.get(_as_key(lead.get("project_id")), {})
         project_name = str(project.get("name", "")).strip()
         partner = project_to_partner.get(project_name, "Unassigned Channel")
-        objection = _objection_from_status(str(lead.get("status", "")))
+        objection = _lead_objection(lead)
         bookings = bookings_by_lead.get(lead_id, [])
         booking_dates = [_as_date(booking.get("booking_date")) for booking in bookings]
         last_activity = max([item for item in booking_dates if item], default=None)
@@ -482,9 +495,16 @@ def _synthetic_lead_date(index: int) -> date:
 
 def _synthetic_activity_date(index: int, status: Any) -> date:
     status_text = str(status).lower()
-    if "inactive" in status_text or "lost" in status_text:
+    if "failed" in status_text or "junk" in status_text:
         return date(2026, 2, 1) + timedelta(days=index % 55)
     return date(2026, 5, 1) + timedelta(days=index % 25)
+
+
+def _lead_objection(lead: dict[str, Any]) -> str:
+    status = str(lead.get("status", "")).strip().lower()
+    if status != "failed":
+        return ""
+    return str(lead.get("objection", "")).strip().lower()
 
 
 def _objection_from_status(status: str) -> str:
