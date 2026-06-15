@@ -53,6 +53,7 @@ class Settings:
     projects_csv_path: Path = Path("data/projects.csv")
     inventory_csv_path: Path = Path("data/inventory.csv")
     bookings_csv_path: Path = Path("data/bookings.csv")
+    site_visits_csv_path: Path = Path("data/site_visits.csv")
     channel_partner_csv_path: Path = Path("data/channel_partner.csv")
     generated_audio_dir: Path = Path("storage/voice_notes")
     generated_chart_dir: Path = Path("storage/charts")
@@ -73,6 +74,7 @@ class Settings:
     snowflake_projects_table: str = "PROJECTS"
     snowflake_inventory_table: str = "INVENTORY"
     snowflake_bookings_table: str = "BOOKINGS"
+    snowflake_site_visits_table: str = "SITE_VISITS"
     snowflake_channel_partner_table: str = "CHANNEL_PARTNER"
 
     openai_api_key: str | None = None
@@ -115,6 +117,7 @@ def get_settings() -> Settings:
         projects_csv_path=Path(os.getenv("PROJECTS_CSV_PATH", "data/projects.csv")),
         inventory_csv_path=Path(os.getenv("INVENTORY_CSV_PATH", "data/inventory.csv")),
         bookings_csv_path=Path(os.getenv("BOOKINGS_CSV_PATH", "data/bookings.csv")),
+        site_visits_csv_path=Path(os.getenv("SITE_VISITS_CSV_PATH", "data/site_visits.csv")),
         channel_partner_csv_path=Path(os.getenv("CHANNEL_PARTNER_CSV_PATH", "data/channel_partner.csv")),
         generated_audio_dir=Path(os.getenv("GENERATED_AUDIO_DIR", "storage/voice_notes")),
         generated_chart_dir=Path(os.getenv("GENERATED_CHART_DIR", "storage/charts")),
@@ -134,6 +137,7 @@ def get_settings() -> Settings:
         snowflake_projects_table=os.getenv("SNOWFLAKE_PROJECTS_TABLE", "PROJECTS"),
         snowflake_inventory_table=os.getenv("SNOWFLAKE_INVENTORY_TABLE", "INVENTORY"),
         snowflake_bookings_table=os.getenv("SNOWFLAKE_BOOKINGS_TABLE", "BOOKINGS"),
+        snowflake_site_visits_table=os.getenv("SNOWFLAKE_SITE_VISITS_TABLE", "SITE_VISITS"),
         snowflake_channel_partner_table=os.getenv("SNOWFLAKE_CHANNEL_PARTNER_TABLE", "CHANNEL_PARTNER"),
         openai_api_key=os.getenv("OPENAI_API_KEY"),
         openai_model=os.getenv("OPENAI_MODEL", "gpt-5.4-mini"),
