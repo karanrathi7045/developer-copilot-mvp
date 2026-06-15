@@ -24,43 +24,102 @@ LOCALITIES = [
     "Thane West",
     "Vikhroli",
 ]
-PROJECT_NAMES = [
-    "Sky Heights",
-    "Lakeview Enclave",
-    "Metro Nest",
-    "Orchid Plaza",
-    "Cedar Grove",
-    "Palm Vista",
-    "Aurum Square",
-    "Harbor Crest",
-    "Nova Residences",
-    "Iris Habitat",
-    "Saffron Park",
-    "Emerald Bay",
-    "Zenith Towers",
-    "Willow Walk",
-    "Crescent Arena",
-    "Maple County",
-    "Pearl Gateway",
-    "Solace Gardens",
-    "Amber One",
-    "Prism Estate",
+PROJECT_PREFIXES = [
+    "Ambrosia",
+    "Eden",
+    "Marina",
+    "Cedar",
+    "Orchid",
+    "Palm",
+    "Aurum",
+    "Harbor",
+    "Nova",
+    "Iris",
+    "Saffron",
+    "Emerald",
+    "Zenith",
+    "Willow",
+    "Crescent",
+    "Maple",
+    "Pearl",
+    "Solace",
+    "Amber",
+    "Prism",
+]
+PROJECT_SUFFIXES = [
+    "Heights",
+    "Enclave",
+    "Nest",
+    "Plaza",
+    "Grove",
+    "Vista",
+    "Square",
+    "Crest",
+    "Residences",
+    "Habitat",
+    "Park",
+    "Bay",
+    "Towers",
+    "Walk",
+    "Arena",
+    "County",
+    "Gateway",
+    "Gardens",
+    "One",
+    "Estate",
+]
+PROJECT_AREAS = [
+    "Andheri West",
+    "Bandra East",
+    "Borivali",
+    "Chembur",
+    "Dadar",
+    "Ghatkopar",
+    "Kandivali",
+    "Lower Parel",
+    "Mulund",
+    "Powai",
+    "Thane West",
+    "Vikhroli",
+    "Worli",
+    "Mahalaxmi",
+    "Juhu",
+    "Malad",
+    "Goregaon",
+    "Kurla",
+    "BKC",
+    "Wadala",
+    "Panvel",
+    "Kharghar",
+    "Airoli",
+    "Nerul",
+    "Seawoods",
 ]
 CONFIGURATIONS = ["1 BHK", "2 BHK", "3 BHK", "4 BHK", "Studio", "Retail Shop"]
 DEVELOPER_CATEGORIES = ["A", "B", "C"]
 LEAD_STATUSES = [
-    "New",
-    "Qualified",
-    "Site Visit Scheduled",
-    "Negotiation",
-    "Booked",
-    "Lost - Budget",
-    "Lost - Timing",
-    "Lost - Authority",
-    "Lost - Competition",
-    "Inactive",
+    "Claimed",
+    "In CC",
+    "Interested",
+    "Meeting Done",
+    "Visit Done",
+    "Final Negotiation",
+    "Booking Done",
+    "Failed",
+    "Junk",
 ]
-PROJECT_STAGES = ["Planning", "Pre-Launch", "Launched", "Under Construction", "Ready to Move"]
+FAILED_OBJECTIONS = [
+    "Budget",
+    "Budget",
+    "Budget",
+    "Timing",
+    "Loan approval",
+    "Location",
+    "Possession timeline",
+    "Price comparison",
+]
+PROJECT_STAGES = ["Under Construction", "Pre-Launch", "Ready to Move In"]
+SITE_VISIT_LEAD_STATUSES = {"Visit Done", "Final Negotiation", "Booking Done"}
 FIRST_NAMES = [
     "Aarav",
     "Aditi",
@@ -117,6 +176,7 @@ def main() -> None:
     inventory = build_inventory(projects)
     leads = build_leads(projects)
     bookings = build_bookings(leads)
+    site_visits = build_site_visits(leads)
     channel_partners = build_channel_partners(projects)
 
     write_csv(
@@ -126,18 +186,23 @@ def main() -> None:
     )
     write_csv(DATA_DIR / "projects.csv", ["id", "name", "developer_id", "stage"], projects)
     write_csv(DATA_DIR / "inventory.csv", ["id", "project_id", "configuration", "total_units", "available_units"], inventory)
-    write_csv(DATA_DIR / "leads.csv", ["id", "name", "status", "project_id"], leads)
+    write_csv(DATA_DIR / "leads.csv", ["id", "name", "status", "project_id", "objection"], leads)
     write_csv(
         DATA_DIR / "bookings.csv",
         ["id", "lead_id", "configuration", "booking_date", "agreement_value", "brokerage_amount"],
         bookings,
     )
     write_csv(
+        DATA_DIR / "site_visits.csv",
+        ["id", "lead_id", "visit_date_time", "status", "visit_note"],
+        site_visits,
+    )
+    write_csv(
         DATA_DIR / "channel_partner.csv",
         ["id", "cp_name", "operation_locality", "projects_working_on"],
         channel_partners,
     )
-    write_snowflake_seed(developers, projects, inventory, leads, bookings, channel_partners)
+    write_snowflake_seed(developers, projects, inventory, leads, bookings, site_visits, channel_partners)
 
 
 def build_developers() -> list[dict[str, Any]]:
@@ -168,22 +233,28 @@ def build_developers() -> list[dict[str, Any]]:
 def build_projects(developers: list[dict[str, Any]]) -> list[dict[str, Any]]:
     rows = []
     for index in range(100):
-        base_name = PROJECT_NAMES[index % len(PROJECT_NAMES)]
         locality = LOCALITIES[index % len(LOCALITIES)]
-        if index % 20 == 0:
+        if index < 5:
             developer_id = 101
         else:
             developer_id = developers[index % len(developers)]["id"]
         rows.append(
             {
                 "id": 101 + index,
-                "name": f"{base_name} {index // len(PROJECT_NAMES) + 1}",
+                "name": project_name(index),
                 "developer_id": developer_id,
                 "stage": PROJECT_STAGES[index % len(PROJECT_STAGES)],
                 "_locality": locality,
             }
         )
     return rows
+
+
+def project_name(index: int) -> str:
+    prefix = PROJECT_PREFIXES[index % len(PROJECT_PREFIXES)]
+    suffix = PROJECT_SUFFIXES[(index * 7) % len(PROJECT_SUFFIXES)]
+    area = PROJECT_AREAS[index % len(PROJECT_AREAS)]
+    return f"{prefix} {suffix} {area}"
 
 
 def build_inventory(projects: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -209,39 +280,54 @@ def build_leads(projects: list[dict[str, Any]]) -> list[dict[str, Any]]:
     rows = []
     demo_projects = [project for project in projects if project["developer_id"] == 101]
     demo_statuses = [
-        "Lost - Budget",
-        "Booked",
-        "Lost - Budget",
-        "Qualified",
-        "Negotiation",
-        "Lost - Timing",
-        "Site Visit Scheduled",
-        "Lost - Budget",
-        "New",
-        "Booked",
+        "Failed",
+        "Booking Done",
+        "Failed",
+        "Interested",
+        "Final Negotiation",
+        "Failed",
+        "Visit Done",
+        "Failed",
+        "Claimed",
+        "Booking Done",
     ]
-    for index in range(100):
+    demo_objections = [
+        "Budget",
+        "",
+        "Budget",
+        "",
+        "",
+        "Timing",
+        "",
+        "Budget",
+        "",
+        "",
+    ]
+    for index in range(1000):
         first = FIRST_NAMES[index % len(FIRST_NAMES)]
         last = LAST_NAMES[(index * 3) % len(LAST_NAMES)]
         if index < len(demo_statuses):
             project_id = demo_projects[index % len(demo_projects)]["id"]
             status = demo_statuses[index]
+            objection = demo_objections[index]
         else:
             project_id = projects[(index * 7) % len(projects)]["id"]
             status = LEAD_STATUSES[index % len(LEAD_STATUSES)]
+            objection = FAILED_OBJECTIONS[(index // len(LEAD_STATUSES)) % len(FAILED_OBJECTIONS)] if status == "Failed" else ""
         rows.append(
             {
                 "id": 1001 + index,
-                "name": f"{first} {last}",
+                "name": f"{first} {last} {index // len(FIRST_NAMES) + 1}",
                 "status": status,
                 "project_id": project_id,
+                "objection": objection,
             }
         )
     return rows
 
 
 def build_bookings(leads: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    booked_leads = [lead for lead in leads if lead["status"] == "Booked"]
+    booked_leads = [lead for lead in leads if lead["status"] == "Booking Done"]
     base_date = date(2026, 1, 2)
     rows = []
     for index in range(100):
@@ -259,6 +345,61 @@ def build_bookings(leads: list[dict[str, Any]]) -> list[dict[str, Any]]:
             }
         )
     return rows
+
+
+def build_site_visits(leads: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    rows = []
+    base_date = date(2026, 1, 3)
+    visit_leads = [
+        lead for lead in leads
+        if str(lead.get("status", "")).strip() in SITE_VISIT_LEAD_STATUSES
+    ]
+    for index, lead in enumerate(visit_leads):
+        status = str(lead.get("status", "")).strip()
+        rows.append(
+            {
+                "id": 8001 + index,
+                "lead_id": lead["id"],
+                "visit_date_time": visit_datetime(base_date, index),
+                "status": "done",
+                "visit_note": site_visit_note(status),
+            }
+        )
+    pre_visit_leads = [
+        lead for lead in leads
+        if str(lead.get("status", "")).strip() in {"Interested", "Meeting Done"}
+    ][:80]
+    for offset, lead in enumerate(pre_visit_leads, start=len(rows)):
+        visit_status = "cancelled" if offset % 4 == 0 else "scheduled"
+        rows.append(
+            {
+                "id": 8001 + offset,
+                "lead_id": lead["id"],
+                "visit_date_time": visit_datetime(base_date, offset),
+                "status": visit_status,
+                "visit_note": site_visit_note(visit_status),
+            }
+        )
+    return rows
+
+
+def visit_datetime(base_date: date, index: int) -> str:
+    visit_date = base_date + timedelta(days=index % 120)
+    hour = 10 + (index % 8)
+    minute = (index * 15) % 60
+    return f"{visit_date.isoformat()} {hour:02d}:{minute:02d}:00"
+
+
+def site_visit_note(lead_status: str) -> str:
+    if lead_status == "Booking Done":
+        return "Completed site visit before booking conversion."
+    if lead_status == "Final Negotiation":
+        return "Completed site visit; buyer moved into final negotiation."
+    if lead_status == "scheduled":
+        return "Site visit is scheduled with the buyer."
+    if lead_status == "cancelled":
+        return "Site visit was cancelled and needs a follow-up."
+    return "Completed site visit; lead moved to Visit Done."
 
 
 def build_channel_partners(projects: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -303,6 +444,7 @@ def write_snowflake_seed(
     inventory: list[dict[str, Any]],
     leads: list[dict[str, Any]],
     bookings: list[dict[str, Any]],
+    site_visits: list[dict[str, Any]],
     channel_partners: list[dict[str, Any]],
 ) -> None:
     lines = [
@@ -312,8 +454,9 @@ def write_snowflake_seed(
         "CREATE OR REPLACE TABLE DEVELOPERS (ID NUMBER, DEVELOPER_NAME TEXT, COUNTRY_CODE TEXT, DEVELOPER_PHONE TEXT, CATEGORY TEXT);",
         "CREATE OR REPLACE TABLE PROJECTS (ID NUMBER, NAME TEXT, DEVELOPER_ID NUMBER, STAGE TEXT);",
         "CREATE OR REPLACE TABLE INVENTORY (ID NUMBER, PROJECT_ID NUMBER, CONFIGURATION TEXT, TOTAL_UNITS NUMBER, AVAILABLE_UNITS NUMBER);",
-        "CREATE OR REPLACE TABLE LEADS (ID NUMBER, NAME TEXT, STATUS TEXT, PROJECT_ID NUMBER);",
+        "CREATE OR REPLACE TABLE LEADS (ID NUMBER, NAME TEXT, STATUS TEXT, PROJECT_ID NUMBER, OBJECTION TEXT);",
         "CREATE OR REPLACE TABLE BOOKINGS (ID NUMBER, LEAD_ID NUMBER, CONFIGURATION TEXT, BOOKING_DATE DATE, AGREEMENT_VALUE NUMBER(14,2), BROKERAGE_AMOUNT NUMBER(14,2));",
+        "CREATE OR REPLACE TABLE SITE_VISITS (ID NUMBER, LEAD_ID NUMBER, VISIT_DATE_TIME TIMESTAMP_NTZ, STATUS TEXT, VISIT_NOTE TEXT);",
         "CREATE OR REPLACE TABLE CHANNEL_PARTNER (ID NUMBER, CP_NAME TEXT, OPERATION_LOCALITY ARRAY, PROJECTS_WORKING_ON ARRAY);",
         "",
         insert_statement(
@@ -329,13 +472,25 @@ def write_snowflake_seed(
             inventory,
             ["id", "project_id", "configuration", "total_units", "available_units"],
         ),
-        insert_statement("LEADS", ["ID", "NAME", "STATUS", "PROJECT_ID"], leads, ["id", "name", "status", "project_id"]),
+        insert_statement(
+            "LEADS",
+            ["ID", "NAME", "STATUS", "PROJECT_ID", "OBJECTION"],
+            leads,
+            ["id", "name", "status", "project_id", "objection"],
+        ),
         insert_statement(
             "BOOKINGS",
             ["ID", "LEAD_ID", "CONFIGURATION", "BOOKING_DATE", "AGREEMENT_VALUE", "BROKERAGE_AMOUNT"],
             bookings,
             ["id", "lead_id", "configuration", "booking_date", "agreement_value", "brokerage_amount"],
             date_columns={"booking_date"},
+        ),
+        insert_statement(
+            "SITE_VISITS",
+            ["ID", "LEAD_ID", "VISIT_DATE_TIME", "STATUS", "VISIT_NOTE"],
+            site_visits,
+            ["id", "lead_id", "visit_date_time", "status", "visit_note"],
+            timestamp_columns={"visit_date_time"},
         ),
         insert_statement(
             "CHANNEL_PARTNER",
@@ -354,21 +509,32 @@ def insert_statement(
     rows: list[dict[str, Any]],
     fields: list[str],
     date_columns: set[str] | None = None,
+    timestamp_columns: set[str] | None = None,
 ) -> str:
     date_columns = date_columns or set()
+    timestamp_columns = timestamp_columns or set()
     values = []
     for row in rows:
-        values.append("(" + ", ".join(sql_value(row[field], field in date_columns) for field in fields) + ")")
+        values.append(
+            "("
+            + ", ".join(
+                sql_value(row[field], is_date=field in date_columns, is_timestamp=field in timestamp_columns)
+                for field in fields
+            )
+            + ")"
+        )
     return f"INSERT INTO {table} ({', '.join(columns)}) VALUES\n" + ",\n".join(values) + ";"
 
 
-def sql_value(value: Any, is_date: bool = False) -> str:
+def sql_value(value: Any, is_date: bool = False, is_timestamp: bool = False) -> str:
     if isinstance(value, list):
         return "ARRAY_CONSTRUCT(" + ", ".join(sql_value(item) for item in value) + ")"
     if isinstance(value, str):
         escaped = value.replace("'", "''")
         if is_date:
             return f"TO_DATE('{escaped}')"
+        if is_timestamp:
+            return f"TO_TIMESTAMP_NTZ('{escaped}')"
         return f"'{escaped}'"
     return str(value)
 
