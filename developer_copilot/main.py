@@ -99,6 +99,7 @@ def get_summary() -> dict[str, Any]:
         "projects": project_data.projects,
         "inventory": project_data.inventory,
         "bookings": project_data.bookings,
+        "site_visits": project_data.site_visits,
         "channel_partners": project_data.channel_partners,
     }
 
