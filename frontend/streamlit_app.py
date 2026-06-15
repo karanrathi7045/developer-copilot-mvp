@@ -9,7 +9,18 @@ import requests
 import streamlit as st
 
 
-API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:8000").rstrip("/")
+STALE_LOCAL_API_BASE_URLS = {"http://127.0.0.1:8036", "http://localhost:8036"}
+LOCAL_CORRECTED_API_BASE_URL = os.getenv("LOCAL_CORRECTED_API_BASE_URL", "http://127.0.0.1:8041").rstrip("/")
+
+
+def resolve_api_base_url() -> str:
+    configured_url = os.getenv("API_BASE_URL", "http://localhost:8000").rstrip("/")
+    if configured_url in STALE_LOCAL_API_BASE_URLS:
+        return LOCAL_CORRECTED_API_BASE_URL
+    return configured_url
+
+
+API_BASE_URL = resolve_api_base_url()
 COPILOT_GREETING = (
     "Hi Karan. Anarock Buildr is ready. Ask me about bookings, conversion, "
     "inventory, CPs, or the next action for today."
@@ -909,6 +920,18 @@ def render_global_styles() -> None:
             background: var(--brand);
             color: #ffffff;
         }
+        .chat-bubble.intro {
+            align-self: stretch;
+            max-width: 100%;
+            border-radius: 12px;
+            padding: 9px 12px;
+            background: linear-gradient(135deg, #fbfcff 0%, #f3f6ff 100%);
+            color: #69758b;
+            border-color: #e8edf7;
+            font-size: 12px;
+            line-height: 1.38;
+            box-shadow: none;
+        }
         .chat-chart-card {
             align-self: stretch;
             border-radius: 14px;
@@ -1189,7 +1212,12 @@ def render_today_item(icon: str, icon_class: str, value: str, label: str) -> str
 def render_copilot_widget() -> None:
     init_copilot_state()
 
-    with st.popover("Ask Buildr", use_container_width=False):
+    with st.popover(
+        "Ask Buildr",
+        key="buildr_popover",
+        on_change=handle_copilot_popover_change,
+        use_container_width=False,
+    ):
         st.html(
             """
             <div class="chat-header">
@@ -1258,8 +1286,6 @@ def render_copilot_widget() -> None:
 
 
 def init_copilot_state() -> None:
-    greeting_message = {"role": "assistant", "content": COPILOT_GREETING}
-
     if "copilot_history_messages" not in st.session_state:
         persisted_messages = load_persisted_copilot_history()
         st.session_state.copilot_history_messages = merge_copilot_messages(
@@ -1267,17 +1293,33 @@ def init_copilot_state() -> None:
             persisted_messages,
         )
     if "copilot_active_messages" not in st.session_state:
-        st.session_state.copilot_active_messages = [greeting_message]
+        st.session_state.copilot_active_messages = [copilot_greeting_message()]
     if "copilot_show_history" not in st.session_state:
         st.session_state.copilot_show_history = False
     if "buildr_suggestion_round" not in st.session_state:
         st.session_state.buildr_suggestion_round = 0
     st.session_state.copilot_active_messages = normalize_copilot_messages(
-        st.session_state.copilot_active_messages or [greeting_message]
+        st.session_state.copilot_active_messages or [copilot_greeting_message()]
     )
     st.session_state.copilot_history_messages = normalize_copilot_messages(
         st.session_state.copilot_history_messages
     )
+
+
+def handle_copilot_popover_change() -> None:
+    if st.session_state.get("buildr_popover"):
+        return
+    reset_active_copilot_chat()
+    st.session_state.copilot_show_history = False
+
+
+def reset_active_copilot_chat() -> None:
+    st.session_state.copilot_active_messages = [copilot_greeting_message()]
+    st.session_state.pop("queued_copilot_question", None)
+
+
+def copilot_greeting_message() -> dict[str, str]:
+    return {"role": "intro", "content": COPILOT_GREETING}
 
 
 def render_copilot_messages(messages: list[dict[str, Any]], show_empty: bool = False) -> None:
@@ -1291,7 +1333,7 @@ def render_copilot_messages(messages: list[dict[str, Any]], show_empty: bool = F
 
     parts: list[str] = []
     for message in messages[-8:]:
-        role = "user" if message["role"] == "user" else "assistant"
+        role = "user" if message["role"] == "user" else "intro" if message["role"] == "intro" else "assistant"
         content = escape(str(message.get("content") or "")).replace("\n", "<br/>")
         parts.append(f'<div class="chat-bubble {role}">{content}</div>')
         chart_url = media_url(message.get("chart_url"))
@@ -1315,7 +1357,8 @@ def normalize_copilot_messages(messages: list[dict[str, Any]]) -> list[dict[str,
                 updated[key] = updated[key].replace("Anarock PropPilot", "Anarock Buildr").replace(
                     "PropPilot", "Buildr"
                 )
-        if updated.get("role") == "assistant" and str(updated.get("content") or "").strip() in LEGACY_COPILOT_GREETINGS:
+        if str(updated.get("content") or "").strip() in LEGACY_COPILOT_GREETINGS:
+            updated["role"] = "intro"
             updated["content"] = COPILOT_GREETING
         normalized.append(updated)
     return normalized
