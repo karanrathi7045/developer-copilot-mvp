@@ -12,7 +12,7 @@ Mock CSV is the default, so the app runs without vendor credentials.
 - Twilio inbound WhatsApp Q&A webhook
 - APScheduler daily 8 AM briefing job
 - Streamlit developer dashboard with floating Ask Buildr chatbot
-- Six normalized mock tables with 100 rows each
+- Six normalized mock tables, including 1,000 mock leads
 - Snowflake connector path with CSV fallback and seed script
 - Render deployment config without Docker
 
@@ -36,14 +36,23 @@ tests/
 
 ## Mock Tables
 
-Each mock table has 100 data rows:
+The mock data is normalized for local demos and Snowflake seeding:
 
 - `DEVELOPERS`: `ID`, `DEVELOPER_NAME`, `COUNTRY_CODE`, `DEVELOPER_PHONE`, `CATEGORY`
-- `LEADS`: `ID`, `NAME`, `STATUS`, `PROJECT_ID`
+- `LEADS`: `ID`, `NAME`, `STATUS`, `PROJECT_ID`, `OBJECTION`
 - `PROJECTS`: `ID`, `NAME`, `DEVELOPER_ID`, `STAGE`
 - `INVENTORY`: `ID`, `PROJECT_ID`, `CONFIGURATION`, `TOTAL_UNITS`, `AVAILABLE_UNITS`
 - `BOOKINGS`: `ID`, `LEAD_ID`, `CONFIGURATION`, `BOOKING_DATE`, `AGREEMENT_VALUE`, `BROKERAGE_AMOUNT`
+- `SITE_VISITS`: `ID`, `LEAD_ID`, `VISIT_DATE_TIME`, `STATUS`, `VISIT_NOTE`
 - `CHANNEL_PARTNER`: `ID`, `CP_NAME`, `OPERATION_LOCALITY`, `PROJECTS_WORKING_ON`
+
+`LEADS` has 1,000 data rows. The allowed lead statuses are `Claimed`, `In CC`, `Interested`, `Meeting Done`, `Visit Done`, `Final Negotiation`, `Booking Done`, `Failed`, and `Junk`. Only `Failed` leads have a value in `OBJECTION`.
+
+`PROJECTS` has distinct project names and only uses these stages: `Under Construction`, `Pre-Launch`, and `Ready to Move In`.
+
+`SITE_VISITS` is created for every lead in `Visit Done`, `Final Negotiation`, or `Booking Done`, with extra scheduled/cancelled examples for pre-visit leads. Visit statuses are `scheduled`, `done`, and `cancelled`; the seeded data keeps booking visit coverage at 90% or higher.
+
+The other mock tables have 100 data rows each.
 
 `OPERATION_LOCALITY` and `PROJECTS_WORKING_ON` are stored as JSON arrays in CSV and as `ARRAY` columns in Snowflake.
 
@@ -97,6 +106,7 @@ LEADS_CSV_PATH=data/leads.csv
 PROJECTS_CSV_PATH=data/projects.csv
 INVENTORY_CSV_PATH=data/inventory.csv
 BOOKINGS_CSV_PATH=data/bookings.csv
+SITE_VISITS_CSV_PATH=data/site_visits.csv
 CHANNEL_PARTNER_CSV_PATH=data/channel_partner.csv
 SCHEDULER_ENABLED=true
 SCHEDULER_TIMEZONE=Asia/Kolkata
@@ -120,6 +130,7 @@ SNOWFLAKE_LEADS_TABLE=LEADS
 SNOWFLAKE_PROJECTS_TABLE=PROJECTS
 SNOWFLAKE_INVENTORY_TABLE=INVENTORY
 SNOWFLAKE_BOOKINGS_TABLE=BOOKINGS
+SNOWFLAKE_SITE_VISITS_TABLE=SITE_VISITS
 SNOWFLAKE_CHANNEL_PARTNER_TABLE=CHANNEL_PARTNER
 ```
 
